@@ -3,7 +3,8 @@ import("stdfaust.lib");
 declare author "JPC";
 declare license "AGPL-3.0-or-later";
 
-process = bass21(level, blend, presence, drive, bass, treble) with {
+process = bass21(pregain, level, blend, presence, drive, bass, treble) with {
+  pregain = hslider("[0] pregain", 0.5, 0.0, 1.0, 0.001) : si.smoo;
   level = hslider("[1] level", 0.5, 0.0, 1.0, 0.001) : si.smoo;
   blend = hslider("[2] blend", 0.5, 0.0, 1.0, 0.001) : si.smoo;
   presence = hslider("[3] presence", 0.5, 0.0, 1.0, 0.001) : si.smoo;
@@ -16,8 +17,9 @@ process = bass21(level, blend, presence, drive, bass, treble) with {
 // Circuit
 //------------------------------------------------------------------------------
 
-bass21(level, blend, presence, drive, bass, treble) =
-  bass21Input
+bass21(pregain, level, blend, presence, drive, bass, treble) =
+  *(pregain)
+  : bass21Input
   <: ((bass21RCNetwork1
        : bass21Presence(presence) : bass21Clip
        : bass21Drive(drive) : bass21Clip

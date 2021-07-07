@@ -87,6 +87,7 @@ void Processor::processBlock(juce::AudioBuffer<float> &buffer, juce::MidiBuffer 
     juce::AudioProcessorValueTreeState &vts = *impl.vts_;
 
     struct {
+        float pregain;
         float level;
         float blend;
         float presence;
@@ -96,6 +97,7 @@ void Processor::processBlock(juce::AudioBuffer<float> &buffer, juce::MidiBuffer 
         int quality;
     } param;
 
+    param.pregain = vts.getRawParameterValue("pregain")->load(std::memory_order_relaxed);
     param.level = vts.getRawParameterValue("level")->load(std::memory_order_relaxed);
     param.blend = vts.getRawParameterValue("blend")->load(std::memory_order_relaxed);
     param.presence = vts.getRawParameterValue("presence")->load(std::memory_order_relaxed);
@@ -124,6 +126,7 @@ void Processor::processBlock(juce::AudioBuffer<float> &buffer, juce::MidiBuffer 
         param.level, param.blend, param.presence, param.drive, param.bass, param.treble, param.quality);
 #endif
 
+    dsp.setPregain(param.pregain);
     dsp.setLevel(param.level);
     dsp.setBlend(param.blend);
     dsp.setPresence(param.presence);
@@ -242,6 +245,12 @@ std::unique_ptr<juce::AudioProcessorValueTreeState> Processor::Impl::setupParame
         nullptr,
         juce::Identifier("PARAMETERS"),
         juce::AudioProcessorValueTreeState::ParameterLayout{
+            std::make_unique<juce::AudioParameterFloat>(
+                "pregain",
+                "Pregain",
+                0.0f,
+                1.0f,
+                0.5f),
             std::make_unique<juce::AudioParameterFloat>(
                 "level",
                 "Level",

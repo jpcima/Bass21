@@ -13,6 +13,7 @@ struct Editor::Impl {
 
     std::list<std::unique_ptr<juce::Label>> labels_;
 
+    std::unique_ptr<juce::Slider> sliderPregain_;
     std::unique_ptr<juce::Slider> sliderLevel_;
     std::unique_ptr<juce::Slider> sliderBlend_;
     std::unique_ptr<juce::Slider> sliderPresence_;
@@ -23,6 +24,7 @@ struct Editor::Impl {
 
     using SliderAttachment = juce::AudioProcessorValueTreeState::SliderAttachment;
     using ComboBoxAttachment = juce::AudioProcessorValueTreeState::ComboBoxAttachment;
+    std::unique_ptr<SliderAttachment> attachPregain_;
     std::unique_ptr<SliderAttachment> attachLevel_;
     std::unique_ptr<SliderAttachment> attachBlend_;
     std::unique_ptr<SliderAttachment> attachPresence_;
@@ -50,7 +52,7 @@ void Editor::Impl::setupComponents(juce::AudioProcessorValueTreeState &vts)
 {
     Editor *editor = editor_;
 
-    const int defaultWidth = 800;
+    const int defaultWidth = 900;
     const int defaultHeight = 200;
     editor->setSize(defaultWidth, defaultHeight);
 
@@ -95,6 +97,7 @@ void Editor::Impl::setupComponents(juce::AudioProcessorValueTreeState &vts)
         editor->addAndMakeVisible(combo);
     };
 
+    addKnob("pregain", "Pregain", row.removeFromLeft(100), sliderPregain_, attachPregain_);
     addKnob("level", "Level", row.removeFromLeft(100), sliderLevel_, attachLevel_);
     addKnob("blend", "Blend", row.removeFromLeft(100), sliderBlend_, attachBlend_);
     addKnob("presence", "Presence", row.removeFromLeft(100), sliderPresence_, attachPresence_);
