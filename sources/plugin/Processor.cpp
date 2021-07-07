@@ -134,15 +134,27 @@ void Processor::processBlock(juce::AudioBuffer<float> &buffer, juce::MidiBuffer 
     dsp.setBass(param.bass);
     dsp.setTreble(param.treble);
 
+    int sampleOffset = 0;
     int numSamples = buffer.getNumSamples();
+    const int maxSamplesPerSegment = 512;
+
     const float **inputs = buffer.getArrayOfReadPointers();
     float **outputs = buffer.getArrayOfWritePointers();
 
-    ovs.ProcessBlock(
-        (float **)inputs, outputs, numSamples, 1, 1,
-        [&dsp](float** inputs, float** outputs, int numSamples) {
-            dsp.compute(numSamples, inputs, outputs);
-        });
+    while (sampleOffset < numSamples) {
+        int numSamplesOfSegment = std::min(maxSamplesPerSegment, numSamples - sampleOffset);
+
+        const float *inputsWithOffset[1] = { inputs[0] + sampleOffset };
+        float *outputsWithOffset[1] = { outputs[0] + sampleOffset };
+
+        ovs.ProcessBlock(
+            (float **)inputsWithOffset, outputsWithOffset, numSamples, 1, 1,
+            [&dsp](float** inputs, float** outputs, int numSamples) {
+                dsp.compute(numSamples, inputs, outputs);
+            });
+
+        sampleOffset += numSamplesOfSegment;
+    }
 
 #if 0
     fprintf(stderr, "%f\n", buffer.getWritePointer(0)[0]);
