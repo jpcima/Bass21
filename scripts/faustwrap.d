@@ -321,7 +321,7 @@ string addClassStartEnd(string code)
 {
     {
         auto expr = regex(`^class\b.*$`, "m");
-        auto match = code.matchFirst(expr);
+        auto match = code.matchLast(expr);
         ulong start = match[0].ptr - code.ptr;
         ulong end = start + match[0].length;
         code = code[0..start] ~ "\n//[Before:class]\n" ~ match[0] ~ "\n\t//[Begin:class]\n" ~ code[end..$];

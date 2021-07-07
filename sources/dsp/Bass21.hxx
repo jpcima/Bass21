@@ -23,11 +23,7 @@ Compilation options: -lang cpp -inpl -mapp -es 1 -double -ftz 0
 #include <cstdint>
 #include <math.h>
 
-
-//[Before:class]
 class Bass21SIG0 {
-	//[Begin:class]
-
 	
   private:
 	
@@ -78,7 +74,11 @@ static double Bass21_faustpower3_f(double value) {
 #define exp10 __exp10
 #endif
 
+
+//[Before:class]
 class Bass21 {
+	//[Begin:class]
+
 	
  private:
 	
