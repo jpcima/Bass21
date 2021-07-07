@@ -49,6 +49,7 @@ add_faust_command(
   "sources/dsp/Bass21.dsp"
   "sources/dsp/Bass21.hxx"
   IN_PLACE
+  DOUBLE
   MATH_APPROXIMATION
   CLASS_NAME "Bass21"
   IMPORT_DIRS "sources/dsp")

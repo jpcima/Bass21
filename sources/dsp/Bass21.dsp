@@ -19,8 +19,9 @@ process = bass21(pregain, level, blend, presence, drive, bass, treble) with {
 
 bass21(pregain, level, blend, presence, drive, bass, treble) =
   *(pregain)
-  : bass21Input
-  <: ((bass21RCNetwork1
+  //: bass21Input
+  <: ((_
+       : bass21RCNetwork1
        : bass21Presence(presence) : bass21Clip
        : bass21Drive(drive) : bass21Clip
        : bass21MysteryActiveFilter
