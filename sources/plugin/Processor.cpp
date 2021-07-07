@@ -249,8 +249,8 @@ std::unique_ptr<juce::AudioProcessorValueTreeState> Processor::Impl::setupParame
                 "pregain",
                 "Pregain",
                 0.0f,
-                1.0f,
-                0.5f),
+                2.0f,
+                1.0f),
             std::make_unique<juce::AudioParameterFloat>(
                 "level",
                 "Level",
