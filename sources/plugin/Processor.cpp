@@ -227,8 +227,6 @@ void Processor::changeProgramName(int index, const juce::String &newName)
 }
 
 //==============================================================================
-static const char StateIdentifier[] = "GROOVY";
-
 void Processor::getStateInformation(juce::MemoryBlock &destData)
 {
     Impl &impl = *impl_;
