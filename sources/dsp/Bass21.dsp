@@ -40,7 +40,19 @@ bass21(pregain, level, blend, presence, drive, bass, treble) =
 //------------------------------------------------------------------------------
 
 // TODO the overdrive sections
-bass21Clip = ef.cubicnl(0.0, 0.0);
+//bass21Clip = atan;
+//bass21Clip = ma.tanh;
+//bass21Clip = ef.cubicnl(0.0, 0.0);
+bass21Clip(x) = y with {
+  y = table(i0)+(ixf-float(i0))*(table(i1)-table(i0));
+  ixf = ((x-xmin)*(float(tsize-1)/(xmax-xmin))) : max(0.0) : min(tsize-1);
+  i0 = int(ixf);
+  i1 = (i0+1) : min(tsize-1);
+  table = rdtable(tsize, ma.tanh((float(ba.time)/float(tsize-1))*(xmax-xmin)+xmin));
+  xmin = -4.0;
+  xmax = 4.0;
+  tsize = 128;
+};
 
 //------------------------------------------------------------------------------
 // Subcircuits
