@@ -106,7 +106,7 @@ void Editor::Impl::setupComponents(juce::AudioProcessorValueTreeState &vts)
     addKnob("treble", "Treble", row.removeFromLeft(100), sliderTreble_, attachTreble_);
     addChoice("quality", "Quality", row.removeFromLeft(100), comboQuality_, attachQuality_);
 
-    const double skewFactor = 3.3;
+    const double skewFactor = -3.3;
     sliderPregain_->setSkewFactor(skewFactor, false);
     sliderLevel_->setSkewFactor(skewFactor, false);
     sliderBlend_->setSkewFactor(skewFactor, false);
