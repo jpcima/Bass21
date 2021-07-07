@@ -6,6 +6,11 @@ It is discretized from an electronic schematic that is close to the original.
 The potentiometers are the same as the ones that are physically on the physical BDDI pedal.
 They have the same effect on the sound.
 
+## Credits
+
+- Jean Pierre Cimalando: circuit analysis and implementation
+- Julien Taverna: circuit analysis and testing
+
 ## How to build
 
 ```
