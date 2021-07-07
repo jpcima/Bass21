@@ -148,7 +148,7 @@ void Processor::processBlock(juce::AudioBuffer<float> &buffer, juce::MidiBuffer 
         float *outputsWithOffset[1] = { outputs[0] + sampleOffset };
 
         ovs.ProcessBlock(
-            (float **)inputsWithOffset, outputsWithOffset, numSamples, 1, 1,
+            (float **)inputsWithOffset, outputsWithOffset, numSamplesOfSegment, 1, 1,
             [&dsp](float** inputs, float** outputs, int numSamples) {
                 dsp.compute(numSamples, inputs, outputs);
             });
