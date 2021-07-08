@@ -108,7 +108,7 @@ void Processor::processBlock(juce::AudioBuffer<float> &buffer, juce::MidiBuffer 
 
     //TODO optimize log2
     double sampleRate = getSampleRate();
-    int desiredFactorLog2 = (int)std::ceil(std::log2(44100.0 * quality / sampleRate));
+    int desiredFactorLog2 = (int)std::ceil(std::log2(44100.0 * (1 << quality) / sampleRate));
     int maxFactorLog2 = (int)iplug::kNumFactors - 1;
 
     int factorLog2 = juce::jlimit(0, maxFactorLog2, desiredFactorLog2);
