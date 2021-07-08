@@ -301,7 +301,7 @@ std::unique_ptr<juce::AudioProcessorValueTreeState> Processor::Impl::setupParame
                 std::make_unique<juce::AudioParameterChoice>(
                     "quality",
                     "Quality",
-                    juce::StringArray{"Low", "Medium", "High", "Very high"},
+                    juce::StringArray{"Low", "Medium", "High", "Very high", "Best"},
                     2),
             }));
 
