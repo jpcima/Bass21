@@ -21,6 +21,18 @@ struct Processor::Impl {
     Bass21 dsp_;
     iplug::OverSampler<float> ovs_;
     int effectiveOvsFactorLog2_ = -1;
+
+    //==========================================================================
+    struct {
+        std::atomic<float> *pregain;
+        std::atomic<float> *level;
+        std::atomic<float> *blend;
+        std::atomic<float> *presence;
+        std::atomic<float> *drive;
+        std::atomic<float> *bass;
+        std::atomic<float> *treble;
+        std::atomic<float> *quality;
+    } param_;
 };
 
 //==============================================================================
@@ -84,31 +96,19 @@ void Processor::processBlock(juce::AudioBuffer<float> &buffer, juce::MidiBuffer 
     Impl &impl = *impl_;
     Bass21 &dsp = impl.dsp_;
     iplug::OverSampler<float> &ovs = impl.ovs_;
-    juce::AudioProcessorValueTreeState &vts = *impl.vts_;
 
-    struct {
-        float pregain;
-        float level;
-        float blend;
-        float presence;
-        float drive;
-        float bass;
-        float treble;
-        int quality;
-    } param;
-
-    param.pregain = vts.getRawParameterValue("pregain")->load(std::memory_order_relaxed);
-    param.level = vts.getRawParameterValue("level")->load(std::memory_order_relaxed);
-    param.blend = vts.getRawParameterValue("blend")->load(std::memory_order_relaxed);
-    param.presence = vts.getRawParameterValue("presence")->load(std::memory_order_relaxed);
-    param.drive = vts.getRawParameterValue("drive")->load(std::memory_order_relaxed);
-    param.bass = vts.getRawParameterValue("bass")->load(std::memory_order_relaxed);
-    param.treble = vts.getRawParameterValue("treble")->load(std::memory_order_relaxed);
-    param.quality = (int)vts.getRawParameterValue("quality")->load(std::memory_order_relaxed);
+    float pregain = impl.param_.pregain->load(std::memory_order_relaxed);
+    float level = impl.param_.level->load(std::memory_order_relaxed);
+    float blend = impl.param_.blend->load(std::memory_order_relaxed);
+    float presence = impl.param_.presence->load(std::memory_order_relaxed);
+    float drive = impl.param_.drive->load(std::memory_order_relaxed);
+    float bass = impl.param_.bass->load(std::memory_order_relaxed);
+    float treble = impl.param_.treble->load(std::memory_order_relaxed);
+    int quality = (int)impl.param_.quality->load(std::memory_order_relaxed);
 
     //TODO optimize log2
     double sampleRate = getSampleRate();
-    int desiredFactorLog2 = (int)std::ceil(std::log2(44100.0 * param.quality / sampleRate));
+    int desiredFactorLog2 = (int)std::ceil(std::log2(44100.0 * quality / sampleRate));
     int maxFactorLog2 = (int)iplug::kNumFactors - 1;
 
     int factorLog2 = juce::jlimit(0, maxFactorLog2, desiredFactorLog2);
@@ -123,16 +123,16 @@ void Processor::processBlock(juce::AudioBuffer<float> &buffer, juce::MidiBuffer 
     fprintf(
         stderr,
         "level=%.3f blend=%.3f presence=%.3f drive=%.3f bass=%.3f treble=%.3f quality=%d\n",
-        param.level, param.blend, param.presence, param.drive, param.bass, param.treble, param.quality);
+        level, blend, presence, drive, bass, treble, quality);
 #endif
 
-    dsp.setPregain(param.pregain);
-    dsp.setLevel(param.level);
-    dsp.setBlend(param.blend);
-    dsp.setPresence(param.presence);
-    dsp.setDrive(param.drive);
-    dsp.setBass(param.bass);
-    dsp.setTreble(param.treble);
+    dsp.setPregain(pregain);
+    dsp.setLevel(level);
+    dsp.setBlend(blend);
+    dsp.setPresence(presence);
+    dsp.setDrive(drive);
+    dsp.setBass(bass);
+    dsp.setTreble(treble);
 
     int sampleOffset = 0;
     int numSamples = buffer.getNumSamples();
@@ -250,59 +250,71 @@ std::unique_ptr<juce::AudioProcessorValueTreeState> Processor::Impl::setupParame
 {
     Processor *self = self_;
 
-    return std::make_unique<juce::AudioProcessorValueTreeState>(
-        *self,
-        nullptr,
-        juce::Identifier("PARAMETERS"),
-        juce::AudioProcessorValueTreeState::ParameterLayout{
-            std::make_unique<juce::AudioParameterFloat>(
-                "pregain",
-                "Pregain",
-                0.0f,
-                2.0f,
-                1.0f),
-            std::make_unique<juce::AudioParameterFloat>(
-                "level",
-                "Level",
-                0.0f,
-                1.0f,
-                0.5f),
-            std::make_unique<juce::AudioParameterFloat>(
-                "blend",
-                "Blend",
-                0.0f,
-                1.0f,
-                0.5f),
-            std::make_unique<juce::AudioParameterFloat>(
-                "presence",
-                "Presence",
-                0.0f,
-                1.0f,
-                0.5f),
-            std::make_unique<juce::AudioParameterFloat>(
-                "drive",
-                "Drive",
-                0.0f,
-                1.0f,
-                0.5f),
-            std::make_unique<juce::AudioParameterFloat>(
-                "bass",
-                "Bass",
-                0.0f,
-                1.0f,
-                0.5f),
-            std::make_unique<juce::AudioParameterFloat>(
-                "treble",
-                "Treble",
-                0.0f,
-                1.0f,
-                0.5f),
-            std::make_unique<juce::AudioParameterChoice>(
-                "quality",
-                "Quality",
-                juce::StringArray{"Low", "Medium", "High", "Very high"},
-                2),
-        });
+    std::unique_ptr<juce::AudioProcessorValueTreeState> vts(
+        new juce::AudioProcessorValueTreeState(
+            *self,
+            nullptr,
+            juce::Identifier("PARAMETERS"),
+            juce::AudioProcessorValueTreeState::ParameterLayout{
+                std::make_unique<juce::AudioParameterFloat>(
+                    "pregain",
+                    "Pregain",
+                    0.0f,
+                    2.0f,
+                    1.0f),
+                std::make_unique<juce::AudioParameterFloat>(
+                    "level",
+                    "Level",
+                    0.0f,
+                    1.0f,
+                    0.5f),
+                std::make_unique<juce::AudioParameterFloat>(
+                    "blend",
+                    "Blend",
+                    0.0f,
+                    1.0f,
+                    0.5f),
+                std::make_unique<juce::AudioParameterFloat>(
+                    "presence",
+                    "Presence",
+                    0.0f,
+                    1.0f,
+                    0.5f),
+                std::make_unique<juce::AudioParameterFloat>(
+                    "drive",
+                    "Drive",
+                    0.0f,
+                    1.0f,
+                    0.5f),
+                std::make_unique<juce::AudioParameterFloat>(
+                    "bass",
+                    "Bass",
+                    0.0f,
+                    1.0f,
+                    0.5f),
+                std::make_unique<juce::AudioParameterFloat>(
+                    "treble",
+                    "Treble",
+                    0.0f,
+                    1.0f,
+                    0.5f),
+                std::make_unique<juce::AudioParameterChoice>(
+                    "quality",
+                    "Quality",
+                    juce::StringArray{"Low", "Medium", "High", "Very high"},
+                    2),
+            }));
+
+    param_.pregain = vts->getRawParameterValue("pregain");
+    param_.level = vts->getRawParameterValue("level");
+    param_.blend = vts->getRawParameterValue("blend");
+    param_.presence = vts->getRawParameterValue("presence");
+    param_.drive = vts->getRawParameterValue("drive");
+    param_.bass = vts->getRawParameterValue("bass");
+    param_.treble = vts->getRawParameterValue("treble");
+    param_.quality = vts->getRawParameterValue("quality");
+
+    return vts;
 }
 
 //==============================================================================
