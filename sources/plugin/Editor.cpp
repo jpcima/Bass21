@@ -9,6 +9,21 @@ struct Editor::Impl {
     void setupComponents(juce::AudioProcessorValueTreeState &vts);
 
     //==========================================================================
+    enum ColourIds {
+        backgroundColourId,
+    };
+
+    //==============================================================================
+    class LookAndFeel : public juce::LookAndFeel_V4 {
+    public:
+        LookAndFeel();
+
+        struct Initializer {
+            Initializer();
+        };
+    };
+
+    //==========================================================================
     Editor *editor_ = nullptr;
 
     std::list<std::unique_ptr<juce::Label>> labels_;
@@ -41,11 +56,18 @@ Editor::Editor(Processor &p)
 {
     Impl &impl = *impl_;
 
+    static Impl::LookAndFeel::Initializer lookAndFeelInitializer;
+
     impl.setupComponents(p.getValueTreeState());
 }
 
 Editor::~Editor()
 {
+}
+
+void Editor::paint(juce::Graphics &g)
+{
+    g.fillAll(findColour(Editor::Impl::backgroundColourId));
 }
 
 void Editor::Impl::setupComponents(juce::AudioProcessorValueTreeState &vts)
@@ -105,4 +127,16 @@ void Editor::Impl::setupComponents(juce::AudioProcessorValueTreeState &vts)
     addKnob("bass", "Bass", row.removeFromLeft(100), sliderBass_, attachBass_);
     addKnob("treble", "Treble", row.removeFromLeft(100), sliderTreble_, attachTreble_);
     addChoice("quality", "Quality", row.removeFromLeft(100), comboQuality_, attachQuality_);
+}
+
+//==============================================================================
+Editor::Impl::LookAndFeel::LookAndFeel()
+{
+    setColour(Editor::Impl::ColourIds::backgroundColourId, juce::Colour(0xff3f3f3f));
+}
+
+Editor::Impl::LookAndFeel::Initializer::Initializer()
+{
+    static LookAndFeel lookAndFeel;
+    juce::LookAndFeel::setDefaultLookAndFeel(&lookAndFeel);
 }
