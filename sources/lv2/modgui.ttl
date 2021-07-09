@@ -1,0 +1,17 @@
+@prefix modgui: <http://moddevices.com/ns/modgui#> .
+@prefix lv2:    <http://lv2plug.in/ns/lv2core#> .
+
+<http://jpcima.sdf1.org/plugins/bass21>
+    modgui:gui [
+        modgui:resourcesDirectory <modgui> ;
+        modgui:iconTemplate <modgui/icon-bass21.html> ;
+        modgui:stylesheet <modgui/stylesheet-bass21.css> ;
+        modgui:screenshot <modgui/screenshot-bass21.png> ;
+        modgui:thumbnail <modgui/thumbnail-bass21.png> ;
+        modgui:brand "JPC" ;
+        modgui:label "Bass21" ;
+        modgui:model "boxy" ;
+        modgui:panel "7-knobs" ;
+        modgui:color "black" ;
+        modgui:knob "gold" ;
+    ] .

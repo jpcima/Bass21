@@ -1,0 +1,145 @@
+@prefix lv2: <http://lv2plug.in/ns/lv2core#> .
+@prefix atom: <http://lv2plug.in/ns/ext/atom#> .
+@prefix patch: <http://lv2plug.in/ns/ext/patch#> .
+@prefix urid: <http://lv2plug.in/ns/ext/urid#> .
+@prefix mod: <http://moddevices.com/ns/mod#> .
+@prefix doap: <http://usefulinc.com/ns/doap#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix bass21: <http://jpcima.sdf1.org/plugins/bass21#> .
+
+bass21:enabled
+    a lv2:Parameter ;
+    lv2:default true ;
+    lv2:designation lv2:enabled ;
+    rdfs:label "Enabled" ;
+    rdfs:range atom:Bool .
+
+bass21:pregain
+    a lv2:Parameter ;
+    lv2:default 1.0 ;
+    lv2:minimum 0.0 ;
+    lv2:maximum 2.0 ;
+    rdfs:label "Pregain" ;
+    rdfs:range atom:Float .
+
+bass21:level
+    a lv2:Parameter ;
+    lv2:default 0.5 ;
+    lv2:minimum 0.0 ;
+    lv2:maximum 1.0 ;
+    rdfs:label "Level" ;
+    rdfs:range atom:Float .
+
+bass21:blend
+    a lv2:Parameter ;
+    lv2:default 0.5 ;
+    lv2:minimum 0.0 ;
+    lv2:maximum 1.0 ;
+    rdfs:label "Blend" ;
+    rdfs:range atom:Float .
+
+bass21:presence
+    a lv2:Parameter ;
+    lv2:default 0.5 ;
+    lv2:minimum 0.0 ;
+    lv2:maximum 1.0 ;
+    rdfs:label "Presence" ;
+    rdfs:range atom:Float .
+
+bass21:drive
+    a lv2:Parameter ;
+    lv2:default 0.5 ;
+    lv2:minimum 0.0 ;
+    lv2:maximum 1.0 ;
+    rdfs:label "Drive" ;
+    rdfs:range atom:Float .
+
+bass21:bass
+    a lv2:Parameter ;
+    lv2:default 0.5 ;
+    lv2:minimum 0.0 ;
+    lv2:maximum 1.0 ;
+    rdfs:label "Bass" ;
+    rdfs:range atom:Float .
+
+bass21:treble
+    a lv2:Parameter ;
+    lv2:default 0.5 ;
+    lv2:minimum 0.0 ;
+    lv2:maximum 1.0 ;
+    rdfs:label "Treble" ;
+    rdfs:range atom:Float .
+
+bass21:quality
+    a lv2:Parameter ;
+    lv2:default 2 ;
+    lv2:minimum 0 ;
+    lv2:maximum 4 ;
+    rdfs:label "Quality" ;
+    rdfs:range atom:Int .
+
+<http://jpcima.sdf1.org/plugins/bass21>
+    a lv2:Plugin, lv2:SimulatorPlugin ;
+
+    doap:name "Bass21" ;
+    doap:license <https://spdx.org/licenses/AGPL-3.0-or-later> ;
+    doap:maintainer [
+      foaf:name     "Jean Pierre Cimalando" ;
+      foaf:homepage <http://jpcima.sdf1.org/> ;
+      foaf:mbox     <mailto:jp-dev@inbox.ru> ;
+    ] ;
+
+    mod:brand "JPC" ;
+    rdfs:seeAlso <modgui.ttl> ;
+
+    rdfs:comment "Bass preamp with tone control" ;
+
+    lv2:minorVersion 0 ;
+    lv2:microVersion 0 ;
+
+    lv2:requiredFeature urid:map, urid:unmap ;
+    lv2:optionalFeature lv2:hardRTCapable ;
+
+    lv2:port [
+        a lv2:InputPort, atom:AtomPort ;
+        lv2:index 0 ;
+        lv2:symbol "control_input" ;
+        lv2:name "Control input" ;
+        lv2:designation lv2:control ;
+        atom:bufferType atom:Sequence ;
+        atom:supports patch:Message ;
+    ] ;
+    lv2:port [
+        a lv2:OutputPort, atom:AtomPort ;
+        lv2:index 1 ;
+        lv2:symbol "control_output" ;
+        lv2:name "Control output" ;
+        lv2:designation lv2:control ;
+        atom:bufferType atom:Sequence ;
+        atom:supports patch:Message ;
+    ] ;
+    lv2:port [
+        a lv2:AudioPort, lv2:InputPort ;
+        lv2:index 2 ;
+        lv2:symbol "input" ;
+        lv2:name "Input" ;
+    ] ;
+    lv2:port [
+        a lv2:AudioPort, lv2:OutputPort ;
+        lv2:index 3 ;
+        lv2:symbol "output" ;
+        lv2:name "Output" ;
+    ] ;
+
+    patch:writable bass21:enabled ;
+    patch:writable bass21:pregain ;
+    patch:writable bass21:level ;
+    patch:writable bass21:blend ;
+    patch:writable bass21:presence ;
+    patch:writable bass21:drive ;
+    patch:writable bass21:bass ;
+    patch:writable bass21:treble ;
+    patch:writable bass21:quality ;
+
+    lv2:binary <Bass21.so> .
