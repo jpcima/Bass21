@@ -2,6 +2,7 @@ import("stdfaust.lib");
 
 declare author "JPC";
 declare license "AGPL-3.0-or-later";
+//NOTE: requires -double
 
 process = bass21(pregain, level, blend, presence, drive, bass, treble) with {
   pregain = hslider("[0] pregain", 0.5, 0.0, 1.0, 0.001) : si.smoo;
@@ -197,19 +198,13 @@ with {
   A2 = 0.0;
 };
 
-// TODO: inaccurate approximation of original
-bass21EQ(bass, treble) =
-    symmetric_highshelf(1, (treble : toRange(-20.0, 20.0)), 7500.0)
-    : fi.peak_eq((bass : toRange(-18.0, 6.0)), 60.0, 300.0)
-    : fi.peak_eq((bass : toRange(-18.0, -12.0)), 1.0, 10.0)
-with {
-  toRange(lo, hi) = *(hi-lo) : +(lo);
-};
-
-/*
-bass21EQ(bass, treble) =
+bass21EQ(bass_, treble_) =
   analogSixthOrder(B0, B1, B2, B3, B4, B5, B6, A0, A1, A2, A3, A4, A5, A6)
 with {
+  //formula refers to control values inverted
+  bass = 1.0-bass_;
+  treble = 1.0-treble_;
+
   B0 =
     0.0;
   B1 =
@@ -289,7 +284,6 @@ with {
   A6 = 0.0
     -((117489690137807889841496944427490234375.0/24519928653854221733733552434404946937899825954937634816.0)*bass*(bass - (1.0))*(0.0 - (1000.0)*(treble*treble) + (1000.0)*treble + (33.0)));
 };
-*/
 
 //------------------------------------------------------------------------------
 // Bilinear transforms
@@ -323,29 +317,27 @@ with {
   k = 2.0*ma.SR;
 };
 
-/*
 analogSixthOrder(B0, B1, B2, B3, B4, B5, B6, A0, A1, A2, A3, A4, A5, A6) =
   fi.iir((b0/a0, b1/a0, b2/a0, b3/a0, b4/a0, b5/a0, b6/a0),
          (a1/a0, a2/a0, a3/a0, a4/a0, a5/a0, a6/a0))
 with {
   // bilinear transform (not prewarped)
-  b0 = B6*(k*k*k*k*k*k) - B5*(k*k*k*k*k) + B4*(k*k*k*k) - B3*(k*k*k) + B2*(k*k) - B1*k + B0;
-  b1 = -6.0*B6*(k*k*k*k*k*k) + 4.0*B5*(k*k*k*k*k) - 2.0*B4*(k*k*k*k) + 2.0*B2*(k*k) - 4.0*B1*k + 6.0*B0;
-  b2 = 15.0*B6*(k*k*k*k*k*k) - 5.0*B5*(k*k*k*k*k) - B4*(k*k*k*k) + 3.0*B3*(k*k*k) - B2*(k*k) - 5.0*B1*k + 15.0*B0;
+  b0 = B6*(k*k*k*k*k*k) + B5*(k*k*k*k*k) + B4*(k*k*k*k) + B3*(k*k*k) + B2*(k*k) + B1*k + B0;
+  b1 = -6.0*B6*(k*k*k*k*k*k) - 4.0*B5*(k*k*k*k*k) - 2.0*B4*(k*k*k*k) + 2.0*B2*(k*k) + 4.0*B1*k + 6.0*B0;
+  b2 = 15.0*B6*(k*k*k*k*k*k) + 5.0*B5*(k*k*k*k*k) - B4*(k*k*k*k) - 3.0*B3*(k*k*k) - B2*(k*k) + 5.0*B1*k + 15.0*B0;
   b3 = -20.0*B6*(k*k*k*k*k*k) + 4.0*B4*(k*k*k*k) - 4.0*B2*(k*k) + 20.0*B0;
-  b4 = 15.0*B6*(k*k*k*k*k*k) + 5.0*B5*(k*k*k*k*k) - B4*(k*k*k*k) - 3.0*B3*(k*k*k) - B2*(k*k) + 5.0*B1*k + 15.0*B0;
-  b5 = -6.0*B6*(k*k*k*k*k*k) - 4.0*B5*(k*k*k*k*k) - 2.0*B4*(k*k*k*k) + 2.0*B2*(k*k) + 4.0*B1*k + 6.0*B0;
-  b6 = B6*(k*k*k*k*k*k) + B5*(k*k*k*k*k) + B4*(k*k*k*k) + B3*(k*k*k) + B2*(k*k) + B1*k + B0;
-  a0 = A6*(k*k*k*k*k*k) - A5*(k*k*k*k*k) + A4*(k*k*k*k) - A3*(k*k*k) + A2*(k*k) - A1*k + A0;
-  a1 = -6.0*A6*(k*k*k*k*k*k) + 4.0*A5*(k*k*k*k*k) - 2.0*A4*(k*k*k*k) + 2.0*A2*(k*k) - 4.0*A1*k + 6.0*A0;
-  a2 = 15.0*A6*(k*k*k*k*k*k) - 5.0*A5*(k*k*k*k*k) - A4*(k*k*k*k) + 3.0*A3*(k*k*k) - A2*(k*k) - 5.0*A1*k + 15.0*A0;
+  b4 = 15.0*B6*(k*k*k*k*k*k) - 5.0*B5*(k*k*k*k*k) - B4*(k*k*k*k) + 3.0*B3*(k*k*k) - B2*(k*k) - 5.0*B1*k + 15.0*B0;
+  b5 = -6.0*B6*(k*k*k*k*k*k) + 4.0*B5*(k*k*k*k*k) - 2.0*B4*(k*k*k*k) + 2.0*B2*(k*k) - 4.0*B1*k + 6.0*B0;
+  b6 = B6*(k*k*k*k*k*k) - B5*(k*k*k*k*k) + B4*(k*k*k*k) - B3*(k*k*k) + B2*(k*k) - B1*k + B0;
+  a0 = A6*(k*k*k*k*k*k) + A5*(k*k*k*k*k) + A4*(k*k*k*k) + A3*(k*k*k) + A2*(k*k) + A1*k + A0;
+  a1 = -6.0*A6*(k*k*k*k*k*k) - 4.0*A5*(k*k*k*k*k) - 2.0*A4*(k*k*k*k) + 2.0*A2*(k*k) + 4.0*A1*k + 6.0*A0;
+  a2 = 15.0*A6*(k*k*k*k*k*k) + 5.0*A5*(k*k*k*k*k) - A4*(k*k*k*k) - 3.0*A3*(k*k*k) - A2*(k*k) + 5.0*A1*k + 15.0*A0;
   a3 = -20.0*A6*(k*k*k*k*k*k) + 4.0*A4*(k*k*k*k) - 4.0*A2*(k*k) + 20.0*A0;
-  a4 = 15.0*A6*(k*k*k*k*k*k) + 5.0*A5*(k*k*k*k*k) - A4*(k*k*k*k) - 3.0*A3*(k*k*k) - A2*(k*k) + 5.0*A1*k + 15.0*A0;
-  a5 = -6.0*A6*(k*k*k*k*k*k) - 4.0*A5*(k*k*k*k*k) - 2.0*A4*(k*k*k*k) + 2.0*A2*(k*k) + 4.0*A1*k + 6.0*A0;
-  a6 = A6*(k*k*k*k*k*k) + A5*(k*k*k*k*k) + A4*(k*k*k*k) + A3*(k*k*k) + A2*(k*k) + A1*k + A0;
+  a4 = 15.0*A6*(k*k*k*k*k*k) - 5.0*A5*(k*k*k*k*k) - A4*(k*k*k*k) + 3.0*A3*(k*k*k) - A2*(k*k) - 5.0*A1*k + 15.0*A0;
+  a5 = -6.0*A6*(k*k*k*k*k*k) + 4.0*A5*(k*k*k*k*k) - 2.0*A4*(k*k*k*k) + 2.0*A2*(k*k) - 4.0*A1*k + 6.0*A0;
+  a6 = A6*(k*k*k*k*k*k) - A5*(k*k*k*k*k) + A4*(k*k*k*k) - A3*(k*k*k) + A2*(k*k) - A1*k + A0;
   k = 2.0*ma.SR;
 };
-*/
 
 //------------------------------------------------------------------------------
 // Filters
