@@ -24,6 +24,7 @@ struct Processor::Impl {
 
     //==========================================================================
     struct {
+        std::atomic<float> *bypass;
         std::atomic<float> *pregain;
         std::atomic<float> *level;
         std::atomic<float> *blend;
@@ -33,6 +34,14 @@ struct Processor::Impl {
         std::atomic<float> *treble;
         std::atomic<float> *quality;
     } param_;
+
+    //==========================================================================
+    template <class Parameter> class NonAutomatable : public Parameter {
+    public:
+        using Parameter::Parameter;
+        virtual ~NonAutomatable() {}
+        virtual bool isAutomatable() const override { return false; }
+    };
 };
 
 //==============================================================================
@@ -89,11 +98,16 @@ bool Processor::isBusesLayoutSupported(const BusesLayout &layouts) const
 
 void Processor::processBlock(juce::AudioBuffer<float> &buffer, juce::MidiBuffer &midiMessages)
 {
-    (void)midiMessages;
+    Impl &impl = *impl_;
+
+    bool bypass = impl.param_.bypass->load(std::memory_order_relaxed) >= 0.5f;
+    if (bypass) {
+        processBlockBypassed(buffer, midiMessages);
+        return;
+    }
 
     juce::ScopedNoDenormals noDenormals;
 
-    Impl &impl = *impl_;
     Bass21 &dsp = impl.dsp_;
     iplug::OverSampler<float> &ovs = impl.ovs_;
 
@@ -118,13 +132,6 @@ void Processor::processBlock(juce::AudioBuffer<float> &buffer, juce::MidiBuffer 
         ovs.SetOverSampling((iplug::EFactor)factorLog2);
         impl.effectiveOvsFactorLog2_ = factorLog2;
     }
-
-#if 0
-    fprintf(
-        stderr,
-        "level=%.3f blend=%.3f presence=%.3f drive=%.3f bass=%.3f treble=%.3f quality=%d\n",
-        level, blend, presence, drive, bass, treble, quality);
-#endif
 
     dsp.setPregain(pregain);
     dsp.setLevel(level);
@@ -155,10 +162,6 @@ void Processor::processBlock(juce::AudioBuffer<float> &buffer, juce::MidiBuffer 
 
         sampleOffset += numSamplesOfSegment;
     }
-
-#if 0
-    fprintf(stderr, "%f\n", buffer.getWritePointer(0)[0]);
-#endif
 }
 
 //==============================================================================
@@ -196,6 +199,13 @@ bool Processor::isMidiEffect() const
 double Processor::getTailLengthSeconds() const
 {
     return 0.0;
+}
+
+juce::AudioProcessorParameter *Processor::getBypassParameter() const
+{
+    Impl &impl = *impl_;
+    juce::AudioProcessorValueTreeState &vts = *impl.vts_;
+    return vts.getParameter("bypass");
 }
 
 //==============================================================================
@@ -256,6 +266,10 @@ std::unique_ptr<juce::AudioProcessorValueTreeState> Processor::Impl::setupParame
             nullptr,
             juce::Identifier("PARAMETERS"),
             juce::AudioProcessorValueTreeState::ParameterLayout{
+                std::make_unique<juce::AudioParameterBool>(
+                    "bypass",
+                    "Bypass",
+                    false),
                 std::make_unique<juce::AudioParameterFloat>(
                     "pregain",
                     "Pregain",
@@ -298,13 +312,14 @@ std::unique_ptr<juce::AudioProcessorValueTreeState> Processor::Impl::setupParame
                     0.0f,
                     1.0f,
                     0.5f),
-                std::make_unique<juce::AudioParameterChoice>(
+                std::make_unique<NonAutomatable<juce::AudioParameterChoice>>(
                     "quality",
                     "Quality",
                     juce::StringArray{"Low", "Medium", "High", "Very high", "Best"},
                     2),
             }));
 
+    param_.bypass = vts->getRawParameterValue("bypass");
     param_.pregain = vts->getRawParameterValue("pregain");
     param_.level = vts->getRawParameterValue("level");
     param_.blend = vts->getRawParameterValue("blend");
