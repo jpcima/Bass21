@@ -1,0 +1,134 @@
+@prefix lv2: <http://lv2plug.in/ns/lv2core#> .
+@prefix atom: <http://lv2plug.in/ns/ext/atom#> .
+@prefix urid: <http://lv2plug.in/ns/ext/urid#> .
+@prefix mod: <http://moddevices.com/ns/mod#> .
+@prefix doap: <http://usefulinc.com/ns/doap#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix bass21: <http://jpcima.sdf1.org/plugins/bass21#> .
+
+<http://jpcima.sdf1.org/plugins/bass21>
+    a lv2:Plugin, lv2:SimulatorPlugin ;
+
+    doap:name "Bass21" ;
+    doap:license <https://spdx.org/licenses/AGPL-3.0-or-later> ;
+    doap:maintainer [
+      foaf:name     "Jean Pierre Cimalando" ;
+      foaf:homepage <http://jpcima.sdf1.org/> ;
+      foaf:mbox     <mailto:jp-dev@inbox.ru> ;
+    ] ;
+
+    mod:brand "JPC" ;
+    rdfs:seeAlso <modgui.ttl> ;
+
+    rdfs:comment "Bass preamp with tone control" ;
+
+    lv2:minorVersion 0 ;
+    lv2:microVersion 0 ;
+
+    lv2:requiredFeature urid:map, urid:unmap ;
+    lv2:optionalFeature lv2:hardRTCapable ;
+
+    lv2:port [
+        a lv2:AudioPort, lv2:InputPort ;
+        lv2:index 0 ;
+        lv2:symbol "input" ;
+        lv2:name "Input" ;
+    ] ;
+    lv2:port [
+        a lv2:AudioPort, lv2:OutputPort ;
+        lv2:index 1 ;
+        lv2:symbol "output" ;
+        lv2:name "Output" ;
+    ] ;
+    lv2:port [
+        a lv2:ControlPort, lv2:InputPort ;
+        lv2:index 2 ;
+        lv2:symbol "enabled" ;
+        lv2:name "Enabled" ;
+        lv2:default 1 ;
+        lv2:minimum 0 ;
+        lv2:maximum 1 ;
+        lv2:portProperty lv2:integer, lv2:toggled ;
+        lv2:designation lv2:enabled ;
+    ] ;
+    lv2:port [
+        a lv2:ControlPort, lv2:InputPort ;
+        lv2:index 3 ;
+        lv2:symbol "pregain" ;
+        lv2:name "Pregain" ;
+        lv2:default 1.0 ;
+        lv2:minimum 0.0 ;
+        lv2:maximum 2.0 ;
+    ] ;
+    lv2:port [
+        a lv2:ControlPort, lv2:InputPort ;
+        lv2:index 4 ;
+        lv2:symbol "level" ;
+        lv2:name "Level" ;
+        lv2:default 0.5 ;
+        lv2:minimum 0.0 ;
+        lv2:maximum 1.0 ;
+    ] ;
+    lv2:port [
+        a lv2:ControlPort, lv2:InputPort ;
+        lv2:index 5 ;
+        lv2:symbol "blend" ;
+        lv2:name "Blend" ;
+        lv2:default 0.5 ;
+        lv2:minimum 0.0 ;
+        lv2:maximum 1.0 ;
+    ] ;
+    lv2:port [
+        a lv2:ControlPort, lv2:InputPort ;
+        lv2:index 6 ;
+        lv2:symbol "presence" ;
+        lv2:name "Presence" ;
+        lv2:default 0.5 ;
+        lv2:minimum 0.0 ;
+        lv2:maximum 1.0 ;
+    ] ;
+    lv2:port [
+        a lv2:ControlPort, lv2:InputPort ;
+        lv2:index 7 ;
+        lv2:symbol "drive" ;
+        lv2:name "Drive" ;
+        lv2:default 0.5 ;
+        lv2:minimum 0.0 ;
+        lv2:maximum 1.0 ;
+    ] ;
+    lv2:port [
+        a lv2:ControlPort, lv2:InputPort ;
+        lv2:index 8 ;
+        lv2:symbol "bass" ;
+        lv2:name "Bass" ;
+        lv2:default 0.5 ;
+        lv2:minimum 0.0 ;
+        lv2:maximum 1.0 ;
+    ] ;
+    lv2:port [
+        a lv2:ControlPort, lv2:InputPort ;
+        lv2:index 9 ;
+        lv2:symbol "treble" ;
+        lv2:name "Treble" ;
+        lv2:default 0.5 ;
+        lv2:minimum 0.0 ;
+        lv2:maximum 1.0 ;
+    ] ;
+    lv2:port [
+        a lv2:ControlPort, lv2:InputPort ;
+        lv2:index 10 ;
+        lv2:symbol "quality" ;
+        lv2:name "Quality" ;
+        lv2:default 2 ;
+        lv2:minimum 0 ;
+        lv2:maximum 3 ;
+        lv2:scalePoint [ rdfs:label "Low" ; rdf:value 0 ; ] ;
+        lv2:scalePoint [ rdfs:label "Medium" ; rdf:value 1 ; ] ;
+        lv2:scalePoint [ rdfs:label "High" ; rdf:value 2 ; ] ;
+        lv2:scalePoint [ rdfs:label "Very high" ; rdf:value 3 ; ] ;
+        lv2:portProperty lv2:integer, lv2:enumeration ;
+    ] ;
+
+    lv2:binary <Bass21.so> .
