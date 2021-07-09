@@ -1,0 +1,46 @@
+@prefix modgui: <http://moddevices.com/ns/modgui#> .
+@prefix lv2:    <http://lv2plug.in/ns/lv2core#> .
+
+<http://jpcima.sdf1.org/plugins/bass21>
+    modgui:gui [
+        modgui:resourcesDirectory <modgui> ;
+        modgui:iconTemplate <modgui/icon-bass21.html> ;
+        modgui:stylesheet <modgui/stylesheet-bass21.css> ;
+        modgui:screenshot <modgui/screenshot-bass21.png> ;
+        modgui:thumbnail <modgui/thumbnail-bass21.png> ;
+        modgui:brand "JPC" ;
+        modgui:label "Bass21" ;
+        modgui:model "boxy" ;
+        modgui:panel "7-knobs" ;
+        modgui:color "black" ;
+        modgui:knob "gold" ;
+        modgui:port [
+            lv2:index 0 ;
+            lv2:symbol "pregain" ;
+            lv2:name "Pregain" ;
+        ] , [
+            lv2:index 1 ;
+            lv2:symbol "level" ;
+            lv2:name "Level" ;
+        ] , [
+            lv2:index 2 ;
+            lv2:symbol "blend" ;
+            lv2:name "Blend" ;
+        ] , [
+            lv2:index 3 ;
+            lv2:symbol "presence" ;
+            lv2:name "Presence" ;
+        ] , [
+            lv2:index 4 ;
+            lv2:symbol "drive" ;
+            lv2:name "Drive" ;
+        ] , [
+            lv2:index 5 ;
+            lv2:symbol "bass" ;
+            lv2:name "Bass" ;
+        ] , [
+            lv2:index 6 ;
+            lv2:symbol "treble" ;
+            lv2:name "Treble" ;
+        ] ;
+    ] .
