@@ -93,8 +93,8 @@ class Bass21 {
 	double fConst12;
 	double fConst13;
 	double fConst14;
-	FAUSTFLOAT fHslider0;
 	double fConst15;
+	FAUSTFLOAT fHslider0;
 	double fRec12[2];
 	double fConst20;
 	double fConst22;
@@ -105,6 +105,7 @@ class Bass21 {
 	double fConst29;
 	double fConst30;
 	FAUSTFLOAT fHslider1;
+	FAUSTFLOAT fCheckbox0;
 	double fRec13[2];
 	double fVec0[2];
 	double fVec1[2];
@@ -193,7 +194,7 @@ class Bass21 {
 		double fConst11 = (4.1229055999999999e-10 * fConst0);
 		fConst12 = (1.0 / ((fConst0 * ((fConst0 * (fConst11 + 5.3921471999999997e-06)) + 0.0065295999999999991)) + 1.0));
 		fConst13 = ((fConst0 * ((fConst0 * (fConst11 + 2.8110719999999996e-07)) + 0.0021295999999999997)) + 1.0);
-		fConst14 = (44.100000000000001 / fConst0);
+		fConst14 = std::exp((0.0 - (200.0 / fConst0)));
 		fConst15 = (1.0 - fConst14);
 		double fConst16 = Bass21_faustpower3_f(fConst0);
 		double fConst17 = (0.0 - (24.0 * fConst16));
@@ -240,6 +241,7 @@ class Bass21 {
 		//[Begin:instanceResetUserInterface]
 		fHslider0 = FAUSTFLOAT(0.5);
 		fHslider1 = FAUSTFLOAT(0.5);
+		fCheckbox0 = FAUSTFLOAT(0.0);
 		fHslider2 = FAUSTFLOAT(0.5);
 		fHslider3 = FAUSTFLOAT(0.5);
 		fHslider4 = FAUSTFLOAT(0.5);
@@ -358,20 +360,23 @@ class Bass21 {
 		//[Begin:compute]
 		FAUSTFLOAT const* input0 = inputs[0];
 		FAUSTFLOAT* output0 = outputs[0];
-		double fSlow0 = (fConst14 * double(fHslider0));
-		double fSlow1 = (fConst14 * double(fHslider1));
-		double fSlow2 = (fConst14 * double(fHslider2));
-		double fSlow3 = (fConst14 * double(fHslider3));
-		double fSlow4 = (fConst14 * double(fHslider4));
-		double fSlow5 = (fConst14 * double(fHslider5));
-		double fSlow6 = (fConst14 * double(fHslider6));
+		double fSlow0 = (fConst15 * double(fHslider0));
+		double fSlow1 = double(fCheckbox0);
+		double fSlow2 = (fConst14 * double(((fSlow1 == fSlow1) | (fSlow1 == 0.0))));
+		double fSlow3 = (1.0 - fSlow2);
+		double fSlow4 = (double(fHslider1) * fSlow3);
+		double fSlow5 = (double(fHslider2) * fSlow3);
+		double fSlow6 = (fConst15 * double(fHslider3));
+		double fSlow7 = (fConst15 * double(fHslider4));
+		double fSlow8 = (double(fHslider5) * fSlow3);
+		double fSlow9 = (double(fHslider6) * fSlow3);
 		for (int i0 = 0; (i0 < count); i0 = (i0 + 1)) {
 			double fTemp0 = double(input0[i0]);
-			fRec12[0] = (fSlow0 + (fConst15 * fRec12[1]));
+			fRec12[0] = (fSlow0 + (fConst14 * fRec12[1]));
 			double fTemp1 = (fTemp0 * fRec12[0]);
 			fRec11[0] = (fTemp1 - (fConst12 * (((fConst20 * fRec11[1]) + (fConst22 * fRec11[2])) + (fConst25 * fRec11[3]))));
 			double fTemp2 = ((((fConst13 * fRec11[0]) + (fConst27 * fRec11[1])) + (fConst28 * fRec11[2])) + (fConst29 * fRec11[3]));
-			fRec13[0] = (fSlow1 + (fConst15 * fRec13[1]));
+			fRec13[0] = (fSlow4 + (fSlow2 * fRec13[1]));
 			double fTemp3 = ((100000.0 * (1.0 - fRec13[0])) + 3300.0);
 			double fTemp4 = (fConst30 * fTemp3);
 			double fTemp5 = (1e-08 * fTemp3);
@@ -387,8 +392,8 @@ class Bass21 {
 			double fTemp10 = std::min<double>(127.0, std::max<double>(0.0, (15.875 * (fRec9[0] + 4.0))));
 			int iTemp11 = int(fTemp10);
 			double fTemp12 = ftbl0Bass21SIG0[iTemp11];
-			double fTemp13 = (fTemp12 + ((fTemp10 - double(iTemp11)) * (ftbl0Bass21SIG0[std::min<int>(127, (iTemp11 + 1))] - fTemp12)));
-			fRec14[0] = (fSlow2 + (fConst15 * fRec14[1]));
+			double fTemp13 = (fTemp12 + ((fTemp10 - double(iTemp11)) * (ftbl0Bass21SIG0[std::min<int>(127, int((iTemp11 + 1)))] - fTemp12)));
+			fRec14[0] = (fSlow5 + (fSlow2 * fRec14[1]));
 			double fTemp14 = (100000.0 * (1.0 - fRec14[0]));
 			double fTemp15 = (fTemp14 + 3300.0);
 			double fTemp16 = (fConst34 * fTemp15);
@@ -402,7 +407,7 @@ class Bass21 {
 			double fTemp19 = std::min<double>(127.0, std::max<double>(0.0, (15.875 * (fRec7[0] + 4.0))));
 			int iTemp20 = int(fTemp19);
 			double fTemp21 = ftbl0Bass21SIG0[iTemp20];
-			fRec6[0] = ((fTemp21 + ((fTemp19 - double(iTemp20)) * (ftbl0Bass21SIG0[std::min<int>(127, (iTemp20 + 1))] - fTemp21))) - (fConst35 * (((fConst37 * fRec6[1]) + (fConst38 * fRec6[2])) + (fConst39 * fRec6[3]))));
+			fRec6[0] = ((fTemp21 + ((fTemp19 - double(iTemp20)) * (ftbl0Bass21SIG0[std::min<int>(127, int((iTemp20 + 1)))] - fTemp21))) - (fConst35 * (((fConst37 * fRec6[1]) + (fConst38 * fRec6[2])) + (fConst39 * fRec6[3]))));
 			double fTemp22 = ((((fConst10 * fRec6[0]) + (fConst40 * fRec6[1])) + (fConst41 * fRec6[2])) + (fConst42 * fRec6[3]));
 			fVec6[0] = fTemp22;
 			fVec7[0] = (0.0 - (fConst5 * ((fConst6 * fRec4[1]) - (fConst8 * fVec6[1]))));
@@ -411,17 +416,17 @@ class Bass21 {
 			fVec8[0] = (0.0 - (fConst2 * ((fConst3 * fRec2[1]) - fRec4[1])));
 			fRec3[0] = (fVec8[1] + (fConst2 * (fRec4[0] + ((2.0 * fRec4[1]) - (fConst45 * fRec3[1])))));
 			fRec2[0] = fRec3[0];
-			fRec15[0] = (fSlow3 + (fConst15 * fRec15[1]));
-			fRec16[0] = (fSlow4 + (fConst15 * fRec16[1]));
+			fRec15[0] = (fSlow6 + (fConst14 * fRec15[1]));
+			fRec16[0] = (fSlow7 + (fConst14 * fRec16[1]));
 			double fTemp23 = std::min<double>(127.0, std::max<double>(0.0, (15.875 * (4.0 - (2.2000000000000002 * (((fRec2[0] * fRec15[0]) + (fTemp1 * (1.0 - fRec15[0]))) * fRec16[0]))))));
 			int iTemp24 = int(fTemp23);
 			double fTemp25 = ftbl0Bass21SIG0[iTemp24];
-			fRec17[0] = (fSlow5 + (fConst15 * fRec17[1]));
+			fRec17[0] = (fSlow8 + (fSlow2 * fRec17[1]));
 			double fTemp26 = (1.0 - fRec17[0]);
 			double fTemp27 = (1120000.0 - (100000.0 * fTemp26));
 			double fTemp28 = (6.0 * fTemp27);
 			double fTemp29 = (fTemp26 * (0.0 - fRec17[0]));
-			fRec18[0] = (fSlow6 + (fConst15 * fRec18[1]));
+			fRec18[0] = (fSlow9 + (fSlow2 * fRec18[1]));
 			double fTemp30 = (1.0 - fRec18[0]);
 			double fTemp31 = (fTemp30 * (1.0 - fTemp30));
 			double fTemp32 = (fTemp29 * ((1000.0 * fTemp31) + 33.0));
@@ -448,7 +453,7 @@ class Bass21 {
 			double fTemp53 = (8.0 * fTemp47);
 			double fTemp54 = (2.0 * fTemp41);
 			double fTemp55 = ((fConst0 * ((fConst0 * ((fConst0 * ((fConst0 * ((fConst0 * (fTemp51 - fTemp52)) + fTemp46)) + fTemp53)) + fTemp49)) + fTemp54)) + fTemp27);
-			fRec1[0] = ((fTemp25 + ((fTemp23 - double(iTemp24)) * (ftbl0Bass21SIG0[std::min<int>(127, (iTemp24 + 1))] - fTemp25))) - (((((((fRec1[1] * (fTemp28 + (fConst0 * ((fConst0 * ((fConst31 * ((fConst0 * (fTemp33 - fTemp36)) - fTemp38)) + fTemp40)) + fTemp42)))) + (fRec1[2] * (fTemp43 + (fConst0 * ((fConst0 * ((fConst0 * ((fConst0 * ((fConst0 * (fTemp44 + fTemp45)) - fTemp46)) - fTemp48)) - fTemp49)) + fTemp50))))) + (fRec1[3] * ((20.0 * fTemp27) + (fConst31 * ((fConst31 * ((64.0 * fTemp37) + (fConst48 * fTemp32))) - (16.0 * fTemp39)))))) + (fRec1[4] * (fTemp43 + (fConst0 * ((fConst0 * ((fConst0 * (fTemp48 + (fConst0 * ((fConst0 * (fTemp45 - fTemp44)) - fTemp46)))) - fTemp49)) - fTemp50))))) + (fRec1[5] * (fTemp28 + (fConst0 * ((fConst0 * (fTemp40 + (fConst31 * ((fConst0 * (fTemp36 + fTemp33)) - fTemp38)))) - fTemp42))))) + (fRec1[6] * ((fConst0 * ((fConst0 * (fTemp49 + (fConst0 * ((fConst0 * (fTemp46 + (fConst0 * (0.0 - (fTemp51 + fTemp52))))) - fTemp53)))) - fTemp54)) + fTemp27))) / fTemp55));
+			fRec1[0] = ((fTemp25 + ((fTemp23 - double(iTemp24)) * (ftbl0Bass21SIG0[std::min<int>(127, int((iTemp24 + 1)))] - fTemp25))) - (((((((fRec1[1] * (fTemp28 + (fConst0 * ((fConst0 * ((fConst31 * ((fConst0 * (fTemp33 - fTemp36)) - fTemp38)) + fTemp40)) + fTemp42)))) + (fRec1[2] * (fTemp43 + (fConst0 * ((fConst0 * ((fConst0 * ((fConst0 * ((fConst0 * (fTemp44 + fTemp45)) - fTemp46)) - fTemp48)) - fTemp49)) + fTemp50))))) + (fRec1[3] * ((20.0 * fTemp27) + (fConst31 * ((fConst31 * ((64.0 * fTemp37) + (fConst48 * fTemp32))) - (16.0 * fTemp39)))))) + (fRec1[4] * (fTemp43 + (fConst0 * ((fConst0 * ((fConst0 * (fTemp48 + (fConst0 * ((fConst0 * (fTemp45 - fTemp44)) - fTemp46)))) - fTemp49)) - fTemp50))))) + (fRec1[5] * (fTemp28 + (fConst0 * ((fConst0 * (fTemp40 + (fConst31 * ((fConst0 * (fTemp36 + fTemp33)) - fTemp38)))) - fTemp42))))) + (fRec1[6] * ((fConst0 * ((fConst0 * (fTemp49 + (fConst0 * ((fConst0 * (fTemp46 + (fConst0 * (0.0 - (fTemp51 + fTemp52))))) - fTemp53)))) - fTemp54)) + fTemp27))) / fTemp55));
 			double fTemp56 = (((fTemp26 * ((((fTemp26 * ((fTemp30 * (1.3200000000000001e-05 - (2.1999999999999999e-05 * fTemp30))) + 1.6137439999999998e-05)) + (2.1999999999999999e-05 * fTemp34)) - (1.3200000000000001e-05 * fTemp30)) + -1.6137439999999998e-05)) + (fTemp30 * ((2.2000000000000001e-06 * fTemp30) + -1.5400000000000001e-06))) + -7.3259999999999998e-07);
 			double fTemp57 = (16.0 * fTemp56);
 			double fTemp58 = (fTemp29 * ((fTemp30 * (700.0 - (1000.0 * fTemp30))) + 333.0));
@@ -469,7 +474,7 @@ class Bass21 {
 			double fTemp73 = std::min<double>(127.0, std::max<double>(0.0, (15.875 * ((fConst0 * ((((((((fRec1[0] * ((fConst0 * ((fConst0 * ((fConst0 * (fTemp57 + fTemp59)) + fTemp61)) + fTemp63)) + fTemp65)) + (fRec1[1] * ((fConst0 * ((fConst31 * (0.0 - (fTemp66 + fTemp67))) + fTemp68)) + fTemp69))) + (fRec1[2] * ((fConst0 * ((fConst0 * ((fConst0 * (fTemp70 - fTemp57)) - fTemp71)) - fTemp63)) + fTemp72))) + (fConst0 * (fRec1[3] * ((fConst53 * fTemp56) - (16.0 * fTemp62))))) + (fRec1[4] * ((fConst0 * ((fConst0 * (fTemp71 + (fConst0 * (0.0 - (fTemp57 + fTemp70))))) - fTemp63)) - fTemp72))) + (fRec1[5] * ((fConst0 * (fTemp68 + (fConst31 * (fTemp67 - fTemp66)))) - fTemp69))) + (fRec1[6] * ((fConst0 * (fTemp63 + (fConst0 * ((fConst0 * (fTemp57 - fTemp59)) - fTemp61)))) - fTemp65))) / fTemp55)) + 4.0))));
 			int iTemp74 = int(fTemp73);
 			double fTemp75 = ftbl0Bass21SIG0[iTemp74];
-			output0[i0] = FAUSTFLOAT((fTemp75 + ((fTemp73 - double(iTemp74)) * (ftbl0Bass21SIG0[std::min<int>(127, (iTemp74 + 1))] - fTemp75))));
+			output0[i0] = FAUSTFLOAT((fTemp75 + ((fTemp73 - double(iTemp74)) * (ftbl0Bass21SIG0[std::min<int>(127, int((iTemp74 + 1)))] - fTemp75))));
 			fRec12[1] = fRec12[0];
 			for (int j0 = 3; (j0 > 0); j0 = (j0 - 1)) {
 				fRec11[j0] = fRec11[(j0 - 1)];
@@ -507,6 +512,9 @@ class Bass21 {
 		//[End:compute]
 	}
 
+
+    FAUSTFLOAT getBegin() const { return fCheckbox0; }
+    void setBegin(FAUSTFLOAT value) { fCheckbox0 = value; }
 
     FAUSTFLOAT getPregain() const { return fHslider0; }
     void setPregain(FAUSTFLOAT value) { fHslider0 = value; }

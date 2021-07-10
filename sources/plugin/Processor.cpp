@@ -78,6 +78,7 @@ void Processor::prepareToPlay(double sampleRate, int samplesPerBlock)
 
     dsp.instanceConstants(sampleRate);
     dsp.instanceClear();
+    dsp.setBegin(true);
 
     ovs.Reset();
     impl.effectiveOvsFactorLog2_ = -1;
@@ -129,6 +130,7 @@ void Processor::processBlock(juce::AudioBuffer<float> &buffer, juce::MidiBuffer 
     if (factorLog2 != impl.effectiveOvsFactorLog2_) {
         dsp.instanceConstants(sampleRate * (1 << factorLog2));
         dsp.instanceClear();
+        dsp.setBegin(true);
         ovs.SetOverSampling((iplug::EFactor)factorLog2);
         impl.effectiveOvsFactorLog2_ = factorLog2;
     }
@@ -162,6 +164,8 @@ void Processor::processBlock(juce::AudioBuffer<float> &buffer, juce::MidiBuffer 
 
         sampleOffset += numSamplesOfSegment;
     }
+
+    dsp.setBegin(false);
 }
 
 //==============================================================================

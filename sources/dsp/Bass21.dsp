@@ -5,13 +5,15 @@ declare license "AGPL-3.0-or-later";
 //NOTE: requires -double
 
 process = bass21(pregain, level, blend, presence, drive, bass, treble) with {
-  pregain = hslider("[0] pregain", 0.5, 0.0, 1.0, 0.001) : si.smoo;
-  level = hslider("[1] level", 0.5, 0.0, 1.0, 0.001) : si.smoo;
-  blend = hslider("[2] blend", 0.5, 0.0, 1.0, 0.001) : si.smoo;
-  presence = hslider("[3] presence", 0.5, 0.0, 1.0, 0.001) : si.smoo;
-  drive = hslider("[4] drive", 0.5, 0.0, 1.0, 0.001) : si.smoo;
-  bass = hslider("[5] bass", 0.5, 0.0, 1.0, 0.001) : si.smoo;
-  treble = hslider("[6] treble", 0.5, 0.0, 1.0, 0.001) : si.smoo;
+  begin = checkbox("[0] begin");
+  pregain = hslider("[1] pregain", 0.5, 0.0, 1.0, 0.001) : si.smooth(pole);
+  level = hslider("[2] level", 0.5, 0.0, 1.0, 0.001) : si.smooth(pole);
+  blend = hslider("[3] blend", 0.5, 0.0, 1.0, 0.001) : si.smooth(pole);
+  presence = hslider("[4] presence", 0.5, 0.0, 1.0, 0.001) : si.polySmooth(begin, pole, 0);
+  drive = hslider("[5] drive", 0.5, 0.0, 1.0, 0.001) : si.polySmooth(begin, pole, 0);
+  bass = hslider("[6] bass", 0.5, 0.0, 1.0, 0.001) : si.polySmooth(begin, pole, 0);
+  treble = hslider("[7] treble", 0.5, 0.0, 1.0, 0.001) : si.polySmooth(begin, pole, 0);
+  pole = ba.tau2pole(5e-3);
 };
 
 //------------------------------------------------------------------------------
@@ -20,7 +22,7 @@ process = bass21(pregain, level, blend, presence, drive, bass, treble) with {
 
 bass21(pregain, level, blend, presence, drive, bass, treble) =
   *(pregain)
-  //: bass21Input
+  : bass21Input
   <: ((_
        : bass21RCNetwork1
        : bass21Presence(presence) : bass21Clip
@@ -68,7 +70,9 @@ with {
   C = 2.2e-6;
 };
 
-bass21Input = analogBiquad(B0, B1, B2, A0, A1, A2) with {
+bass21Input = _ /*NOTE: negligible input buffer*/
+  //analogBiquad(B0, B1, B2, A0, A1, A2)
+with {
   R1 = 10e3;
   R2 = 1e6;
   C1 = 22e-9;
