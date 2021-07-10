@@ -12,6 +12,7 @@ which is specific to this digital version.
 - [32-bit Windows VST3](https://nightly.link/jpcima/Bass21/workflows/build/master/Win32%20VST3.zip)  
 - [macOS Universal AU (**not signed**)](https://nightly.link/jpcima/Bass21/workflows/build/master/macOS%20AU.zip)  
 - [macOS Universal VST3 (**not signed**)](https://nightly.link/jpcima/Bass21/workflows/build/master/macOS%20VST3.zip)
+- [MOD devices LV2](https://nightly.link/jpcima/Bass21/workflows/build/master/MOD%20LV2.zip)
 
 ## Credits
 
