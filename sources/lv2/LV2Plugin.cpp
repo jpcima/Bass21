@@ -1,6 +1,5 @@
 #include "dsp/Core.h"
 #include <lv2/lv2plug.in/ns/lv2core/lv2.h>
-#include <algorithm>
 #include <cstdio>
 #include <cstring>
 #include <cassert>
