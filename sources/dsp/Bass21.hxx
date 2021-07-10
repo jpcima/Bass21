@@ -21,7 +21,6 @@ Compilation options: -lang cpp -inpl -mapp -es 1 -double -ftz 0
 #include <algorithm>
 #include <cmath>
 #include <cstdint>
-#include <math.h>
 
 class Bass21DSPSIG0 {
 	
