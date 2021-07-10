@@ -124,7 +124,7 @@ void Processor::processBlock(juce::AudioBuffer<float> &buffer, juce::MidiBuffer 
     //TODO optimize log2
     double sampleRate = getSampleRate();
     int desiredFactorLog2 = (int)std::ceil(std::log2(44100.0 * (1 << quality) / sampleRate));
-    int maxFactorLog2 = (int)iplug::kNumFactors - 1;
+    int maxFactorLog2 = (int)iplug::k8x;
 
     int factorLog2 = juce::jlimit(0, maxFactorLog2, desiredFactorLog2);
     if (factorLog2 != impl.effectiveOvsFactorLog2_) {
@@ -319,7 +319,7 @@ std::unique_ptr<juce::AudioProcessorValueTreeState> Processor::Impl::setupParame
                 std::make_unique<NonAutomatable<juce::AudioParameterChoice>>(
                     "quality",
                     "Quality",
-                    juce::StringArray{"Low", "Medium", "High", "Very high", "Best"},
+                    juce::StringArray{"Low", "Medium", "High", "Very high"},
                     2),
             }));
 
