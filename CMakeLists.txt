@@ -43,6 +43,8 @@ target_sources(Bass21
   "sources/plugin/Processor.cpp"
   "sources/plugin/Editor.h"
   "sources/plugin/Editor.cpp"
+  "sources/dsp/Core.h"
+  "sources/dsp/Core.cpp"
   "sources/dsp/Bass21.hxx")
 
 add_faust_command(
@@ -51,7 +53,7 @@ add_faust_command(
   IN_PLACE
   DOUBLE
   MATH_APPROXIMATION
-  CLASS_NAME "Bass21"
+  CLASS_NAME "Bass21DSP"
   IMPORT_DIRS "sources/dsp")
 
 target_include_directories(Bass21

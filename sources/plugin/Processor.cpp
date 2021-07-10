@@ -1,15 +1,7 @@
 // SPDX-License-Identifier: BSD-2-Clause
 #include "Processor.h"
 #include "Editor.h"
-#include "dsp/Bass21.hxx"
-#if defined(__GNUC__)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wsign-conversion"
-#endif
-#include <Oversampler.h>
-#if defined(__GNUC__)
-#pragma GCC diagnostic pop
-#endif
+#include "dsp/Core.h"
 
 struct Processor::Impl {
     explicit Impl(Processor *self) : self_(self), vts_(setupParameters()) {}
@@ -19,8 +11,6 @@ struct Processor::Impl {
     Processor *self_ = nullptr;
     std::unique_ptr<juce::AudioProcessorValueTreeState> vts_;
     Bass21 dsp_;
-    iplug::OverSampler<float> ovs_;
-    int effectiveOvsFactorLog2_ = -1;
 
     //==========================================================================
     struct {
@@ -45,7 +35,7 @@ Processor::Processor()
 {
     Impl &impl = *impl_;
     Bass21 &dsp = impl.dsp_;
-    dsp.init(44100);
+    dsp.init();
 }
 
 Processor::~Processor()
@@ -66,14 +56,8 @@ void Processor::prepareToPlay(double sampleRate, int samplesPerBlock)
 
     Impl &impl = *impl_;
     Bass21 &dsp = impl.dsp_;
-    iplug::OverSampler<float> &ovs = impl.ovs_;
 
-    dsp.instanceConstants(sampleRate);
-    dsp.instanceClear();
-    dsp.setBegin(true);
-
-    ovs.Reset();
-    impl.effectiveOvsFactorLog2_ = -1;
+    dsp.setSampleRate(sampleRate);
 }
 
 void Processor::releaseResources()
@@ -100,9 +84,7 @@ void Processor::processBlock(juce::AudioBuffer<float> &buffer, juce::MidiBuffer 
     }
 
     juce::ScopedNoDenormals noDenormals;
-
     Bass21 &dsp = impl.dsp_;
-    iplug::OverSampler<float> &ovs = impl.ovs_;
 
     float pregain = impl.param_.pregain->load(std::memory_order_relaxed);
     float level = impl.param_.level->load(std::memory_order_relaxed);
@@ -113,20 +95,6 @@ void Processor::processBlock(juce::AudioBuffer<float> &buffer, juce::MidiBuffer 
     float treble = impl.param_.treble->load(std::memory_order_relaxed);
     int quality = (int)impl.param_.quality->load(std::memory_order_relaxed);
 
-    //TODO optimize log2
-    double sampleRate = getSampleRate();
-    int desiredFactorLog2 = (int)std::ceil(std::log2(44100.0 * (1 << quality) / sampleRate));
-    int maxFactorLog2 = (int)iplug::k8x;
-
-    int factorLog2 = juce::jlimit(0, maxFactorLog2, desiredFactorLog2);
-    if (factorLog2 != impl.effectiveOvsFactorLog2_) {
-        dsp.instanceConstants(sampleRate * (1 << factorLog2));
-        dsp.instanceClear();
-        dsp.setBegin(true);
-        ovs.SetOverSampling((iplug::EFactor)factorLog2);
-        impl.effectiveOvsFactorLog2_ = factorLog2;
-    }
-
     dsp.setPregain(pregain);
     dsp.setLevel(level);
     dsp.setBlend(blend);
@@ -134,30 +102,9 @@ void Processor::processBlock(juce::AudioBuffer<float> &buffer, juce::MidiBuffer 
     dsp.setDrive(drive);
     dsp.setBass(bass);
     dsp.setTreble(treble);
+    dsp.setQuality(quality);
 
-    int sampleOffset = 0;
-    int numSamples = buffer.getNumSamples();
-    const int maxSamplesPerSegment = 512;
-
-    const float **inputs = buffer.getArrayOfReadPointers();
-    float **outputs = buffer.getArrayOfWritePointers();
-
-    while (sampleOffset < numSamples) {
-        int numSamplesOfSegment = std::min(maxSamplesPerSegment, numSamples - sampleOffset);
-
-        const float *inputsWithOffset[1] = { inputs[0] + sampleOffset };
-        float *outputsWithOffset[1] = { outputs[0] + sampleOffset };
-
-        ovs.ProcessBlock(
-            (float **)inputsWithOffset, outputsWithOffset, numSamplesOfSegment, 1, 1,
-            [&dsp](float** inputs, float** outputs, int numSamples) {
-                dsp.compute(numSamples, inputs, outputs);
-            });
-
-        sampleOffset += numSamplesOfSegment;
-    }
-
-    dsp.setBegin(false);
+    dsp.run(buffer.getReadPointer(0), buffer.getWritePointer(0), buffer.getNumSamples());
 }
 
 //==============================================================================
