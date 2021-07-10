@@ -30,7 +30,7 @@ jobs:
     - name: Configure CMake
       working-directory: ${{runner.workspace}}/build
       run: |
-       cmake "${Env:GITHUB_WORKSPACE}" -G"Visual Studio 16 2019" -A"${Env:release_arch}" -DCMAKE_BUILD_TYPE="${Env:BUILD_TYPE}" -DCMAKE_CXX_STANDARD=17
+       cmake "${Env:GITHUB_WORKSPACE}" -G"Visual Studio 16 2019" -A"${Env:release_arch}" -DCMAKE_BUILD_TYPE="${Env:BUILD_TYPE}" -DCMAKE_CXX_STANDARD=17 -DBASS21_LV2=OFF
     - name: Build
       working-directory: ${{runner.workspace}}/build
       run: cmake --build . --config "${Env:BUILD_TYPE}" -j 2
@@ -55,7 +55,7 @@ jobs:
     - name: Configure CMake
       working-directory: ${{runner.workspace}}/build
       run: |
-       cmake "${Env:GITHUB_WORKSPACE}" -G"Visual Studio 16 2019" -A"${Env:release_arch}" -DCMAKE_BUILD_TYPE="${Env:BUILD_TYPE}" -DCMAKE_CXX_STANDARD=17
+       cmake "${Env:GITHUB_WORKSPACE}" -G"Visual Studio 16 2019" -A"${Env:release_arch}" -DCMAKE_BUILD_TYPE="${Env:BUILD_TYPE}" -DCMAKE_CXX_STANDARD=17 -DBASS21_LV2=OFF
     - name: Build
       working-directory: ${{runner.workspace}}/build
       run: cmake --build . --config "${Env:BUILD_TYPE}" -j 2
@@ -76,7 +76,7 @@ jobs:
     - name: Configure CMake
       working-directory: ${{runner.workspace}}/build
       run: |
-       cmake "${GITHUB_WORKSPACE}" -DCMAKE_BUILD_TYPE="${BUILD_TYPE}" -DCMAKE_CXX_STANDARD=17 -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64"
+       cmake "${GITHUB_WORKSPACE}" -DCMAKE_BUILD_TYPE="${BUILD_TYPE}" -DCMAKE_CXX_STANDARD=17 -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -DBASS21_LV2=OFF
     - name: Build
       working-directory: ${{runner.workspace}}/build
       run: cmake --build . --config "${BUILD_TYPE}" -j 2
