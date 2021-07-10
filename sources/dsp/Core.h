@@ -27,10 +27,19 @@ public:
     void setQuality(int value) { quality_ = value; }
 
 private:
+    static constexpr int maxFramesPerSegment = 512;
+    static constexpr float fadeDelay = 100e-3;
+    //
     double sampleRate_ = 44100.0;
     int effectiveOvsFactorLog2_ = -1;
+    bool suspended_ = false;
+    float bypassFade_ = 0.0;
+    //
     bool bypass_ = false;
     int quality_ = 0;
+    //
     Bass21DSP dsp_;
     iplug::OverSampler<float> ovs_;
+    //
+    float copyBuffer_[maxFramesPerSegment];
 };

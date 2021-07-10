@@ -1,5 +1,9 @@
 #include "Core.h"
+#include <cstdio>
 #include <cstring>
+
+constexpr int Bass21::maxFramesPerSegment;
+constexpr float Bass21::fadeDelay;
 
 void Bass21::init()
 {
@@ -16,6 +20,8 @@ void Bass21::clear()
 
     ovs_.Reset();
     effectiveOvsFactorLog2_ = -1;
+    suspended_ = false;
+    bypassFade_ = bypass_;
 }
 
 void Bass21::setSampleRate(double sampleRate)
@@ -26,16 +32,10 @@ void Bass21::setSampleRate(double sampleRate)
 
 void Bass21::run(const float *input, float *output, int numFrames)
 {
-    double sampleRate = sampleRate_;
-    int quality = quality_;
+    const double sampleRate = sampleRate_;
+    const int quality = quality_;
 
-    if (bypass_) {
-        //TODO clean bypass
-        if (input != output)
-            std::memcpy(output, input, (unsigned)numFrames * sizeof(float));
-        return;
-    }
-
+    ///
     Bass21DSP &dsp = dsp_;
     iplug::OverSampler<float> &ovs = ovs_;
 
@@ -55,23 +55,66 @@ void Bass21::run(const float *input, float *output, int numFrames)
         effectiveOvsFactorLog2_ = factorLog2;
     }
 
-    int sampleOffset = 0;
-    const int maxSamplesPerSegment = 512;
+    ///
+    const bool bypass = bypass_;
+    float bypassFade = bypassFade_;
 
-    while (sampleOffset < numFrames) {
-        int numSamplesOfSegment = std::min(maxSamplesPerSegment, numFrames - sampleOffset);
+    if (suspended_ && !bypass && bypass == bypassFade) {
+        // resume from suspended state
+        clear();
+    }
 
-        const float *inputsWithOffset[1] = { input + sampleOffset };
-        float *outputsWithOffset[1] = { output + sampleOffset };
+    int frameOffset = 0;
 
+    while (frameOffset < numFrames) {
+        const float *inputWithOffset = input + frameOffset;
+        float *outputWithOffset = output + frameOffset;
+        int numFramesOfSegment = std::min(maxFramesPerSegment, numFrames - frameOffset);
+
+        if (bypass && bypassFade == 1.0f) {
+            if (input != output)
+                std::memcpy(outputWithOffset, inputWithOffset, (unsigned)(numFrames - frameOffset) * sizeof(float));
+            frameOffset = numFrames;
+            suspended_ = true;
+            break;
+        }
+
+        ///
+        bool fading = bypass != bypassFade;
+        float *copyBuffer = copyBuffer_;
+        if (fading)
+            std::memcpy(copyBuffer, inputWithOffset, (unsigned)numFramesOfSegment * sizeof(float));
+
+        ///
         ovs.ProcessBlock(
-            (float **)inputsWithOffset, outputsWithOffset, numSamplesOfSegment, 1, 1,
-            [&dsp](float** inputs, float** outputs, int numSamples) {
+            (float **)&inputWithOffset, &outputWithOffset, numFramesOfSegment, 1, 1,
+            [&dsp](float **inputs, float **outputs, int numSamples) {
                 dsp.compute(numSamples, inputs, outputs);
             });
 
-        sampleOffset += numSamplesOfSegment;
+        ///
+        if (fading && bypass) {
+            float fadeInc = (1.0f / (float)sampleRate) * (1.0f / fadeDelay);
+            for (int i = 0; i < numFramesOfSegment; ++i) {
+                outputWithOffset[i] = outputWithOffset[i] * (1.0f - bypassFade) + copyBuffer[i] * bypassFade;
+                bypassFade = bypassFade + fadeInc;
+                bypassFade = (bypassFade > 1.0f) ? 1.0f : bypassFade;
+            }
+        }
+        else if (fading && !bypass) {
+            float fadeInc = (1.0f / (float)sampleRate) * (1.0f / fadeDelay);
+            for (int i = 0; i < numFramesOfSegment; ++i) {
+                outputWithOffset[i] = outputWithOffset[i] * (1.0f - bypassFade) + copyBuffer[i] * bypassFade;
+                bypassFade = bypassFade - fadeInc;
+                bypassFade = (bypassFade < 0.0f) ? 0.0f : bypassFade;
+            }
+        }
+
+        ///
+        frameOffset += numFramesOfSegment;
     }
 
     dsp.setBegin(false);
+
+    bypassFade_ = bypassFade;
 }
