@@ -130,6 +130,7 @@ void Processor::processBlock(juce::AudioBuffer<float> &buffer, juce::MidiBuffer 
         dsp.instanceConstants(sampleRate * (1 << factorLog2));
         dsp.instanceClear();
         ovs.SetOverSampling((iplug::EFactor)factorLog2);
+        ovs.Reset();
         impl.effectiveOvsFactorLog2_ = factorLog2;
     }
 
