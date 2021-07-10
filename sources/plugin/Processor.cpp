@@ -93,8 +93,6 @@ void Processor::processBlockBypassed(juce::AudioBuffer<float> &buffer, juce::Mid
 void Processor::processBlockInternally(juce::AudioBuffer<float> &buffer, bool isForcedBypass)
 {
     Impl &impl = *impl_;
-
-    juce::ScopedNoDenormals noDenormals;
     Bass21 &dsp = impl.dsp_;
 
     bool bypass = isForcedBypass || impl.param_.bypass->load(std::memory_order_relaxed) >= 0.5f;

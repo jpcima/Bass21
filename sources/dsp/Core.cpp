@@ -1,4 +1,5 @@
 #include "Core.h"
+#include <DenormalDisabler.h>
 #include <cstdio>
 #include <cstring>
 
@@ -32,6 +33,9 @@ void Bass21::setSampleRate(double sampleRate)
 
 void Bass21::run(const float *input, float *output, int numFrames)
 {
+    WebCore::DenormalDisabler denormalDisabler;
+
+    ///
     const double sampleRate = sampleRate_;
     const int quality = quality_;
 

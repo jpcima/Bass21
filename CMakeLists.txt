@@ -86,7 +86,8 @@ if(BASS21_JUCE)
   ###
   target_include_directories(Bass21 PRIVATE
     "thirdparty/iPlug2"
-    "thirdparty/hiir-1.33")
+    "thirdparty/hiir-1.33"
+    "thirdparty/blink")
 endif()
 
 #------------------------------------------------------------------------------#
@@ -145,5 +146,6 @@ if(BASS21_LV2)
 
   target_include_directories(Bass21_LV2 PRIVATE
     "thirdparty/iPlug2"
-    "thirdparty/hiir-1.33")
+    "thirdparty/hiir-1.33"
+    "thirdparty/blink")
 endif()
