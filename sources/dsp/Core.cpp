@@ -63,14 +63,7 @@ void Bass21::run(const float *input, float *output, int numFrames)
     const bool bypass = bypass_;
     float bypassFade = bypassFade_;
 
-    if (suspended_ && !bypass && bypass == bypassFade) {
-        // resume from suspended state
-        clear();
-    }
-
-    int frameOffset = 0;
-
-    while (frameOffset < numFrames) {
+    for (int frameOffset = 0; frameOffset < numFrames; ) {
         const float *inputWithOffset = input + frameOffset;
         float *outputWithOffset = output + frameOffset;
         int numFramesOfSegment = std::min(maxFramesPerSegment, numFrames - frameOffset);
@@ -82,6 +75,8 @@ void Bass21::run(const float *input, float *output, int numFrames)
             suspended_ = true;
             break;
         }
+        if (suspended_)
+            clear();
 
         ///
         bool fading = bypass != bypassFade;
