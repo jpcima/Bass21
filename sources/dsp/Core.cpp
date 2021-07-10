@@ -1,4 +1,5 @@
 #include "Core.h"
+#include <cstring>
 
 void Bass21::init()
 {
@@ -27,6 +28,13 @@ void Bass21::run(const float *input, float *output, int numFrames)
 {
     double sampleRate = sampleRate_;
     int quality = quality_;
+
+    if (bypass_) {
+        //TODO clean bypass
+        if (input != output)
+            std::memcpy(output, input, (unsigned)numFrames * sizeof(float));
+        return;
+    }
 
     Bass21DSP &dsp = dsp_;
     iplug::OverSampler<float> &ovs = ovs_;

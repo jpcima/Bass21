@@ -17,7 +17,12 @@ public:
     bool isBusesLayoutSupported(const BusesLayout &layouts) const override;
     void processBlock(juce::AudioBuffer<float> &buffer, juce::MidiBuffer &midiMessages) override;
     void processBlock(juce::AudioBuffer<double> &, juce::MidiBuffer &) override { jassertfalse; }
+    void processBlockBypassed(juce::AudioBuffer<float> &buffer, juce::MidiBuffer &midiMessages) override;
+    void processBlockBypassed(juce::AudioBuffer<double> &, juce::MidiBuffer &) override { jassertfalse; }
+private:
+    void processBlockInternally(juce::AudioBuffer<float> &buffer, bool isForcedBypass);
 
+public:
     //==========================================================================
     juce::AudioProcessorEditor *createEditor() override;
     bool hasEditor() const override;

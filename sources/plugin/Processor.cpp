@@ -24,6 +24,7 @@ struct Processor::Impl {
         std::atomic<float> *treble;
         std::atomic<float> *quality;
     } param_;
+    juce::RangedAudioParameter *bypassParameter_ = nullptr;
 };
 
 //==============================================================================
@@ -75,17 +76,28 @@ bool Processor::isBusesLayoutSupported(const BusesLayout &layouts) const
 
 void Processor::processBlock(juce::AudioBuffer<float> &buffer, juce::MidiBuffer &midiMessages)
 {
-    Impl &impl = *impl_;
+    (void)midiMessages;
+    bool isForcedBypass = false;
+    processBlockInternally(buffer, isForcedBypass);
+}
 
-    bool bypass = impl.param_.bypass->load(std::memory_order_relaxed) >= 0.5f;
-    if (bypass) {
-        processBlockBypassed(buffer, midiMessages);
-        return;
-    }
+void Processor::processBlockBypassed(juce::AudioBuffer<float> &buffer, juce::MidiBuffer &midiMessages)
+{
+    //NOTE: documentation promises this will not get called when there is a
+    //      custom bypass parameter, in practice it is not the case.
+    (void)midiMessages;
+    bool isForcedBypass = true;
+    processBlockInternally(buffer, isForcedBypass);
+}
+
+void Processor::processBlockInternally(juce::AudioBuffer<float> &buffer, bool isForcedBypass)
+{
+    Impl &impl = *impl_;
 
     juce::ScopedNoDenormals noDenormals;
     Bass21 &dsp = impl.dsp_;
 
+    bool bypass = isForcedBypass || impl.param_.bypass->load(std::memory_order_relaxed) >= 0.5f;
     float pregain = impl.param_.pregain->load(std::memory_order_relaxed);
     float level = impl.param_.level->load(std::memory_order_relaxed);
     float blend = impl.param_.blend->load(std::memory_order_relaxed);
@@ -95,6 +107,7 @@ void Processor::processBlock(juce::AudioBuffer<float> &buffer, juce::MidiBuffer 
     float treble = impl.param_.treble->load(std::memory_order_relaxed);
     int quality = (int)impl.param_.quality->load(std::memory_order_relaxed);
 
+    dsp.setBypass(bypass);
     dsp.setPregain(pregain);
     dsp.setLevel(level);
     dsp.setBlend(blend);
@@ -147,8 +160,7 @@ double Processor::getTailLengthSeconds() const
 juce::AudioProcessorParameter *Processor::getBypassParameter() const
 {
     Impl &impl = *impl_;
-    juce::AudioProcessorValueTreeState &vts = *impl.vts_;
-    return vts.getParameter("bypass");
+    return impl.bypassParameter_;
 }
 
 //==============================================================================
@@ -272,6 +284,8 @@ std::unique_ptr<juce::AudioProcessorValueTreeState> Processor::Impl::setupParame
     param_.bass = vts->getRawParameterValue("bass");
     param_.treble = vts->getRawParameterValue("treble");
     param_.quality = vts->getRawParameterValue("quality");
+
+    bypassParameter_ = vts->getParameter("bypass");
 
     return vts;
 }

@@ -16,6 +16,7 @@ public:
     void setSampleRate(double sampleRate);
     void run(const float *input, float *output, int numFrames);
 
+    void setBypass(bool value) { bypass_ = value; }
     void setPregain(float value) { dsp_.setPregain(value); }
     void setLevel(float value) { dsp_.setLevel(value); }
     void setBlend(float value) { dsp_.setBlend(value); }
@@ -28,6 +29,7 @@ public:
 private:
     double sampleRate_ = 44100.0;
     int effectiveOvsFactorLog2_ = -1;
+    bool bypass_ = false;
     int quality_ = 0;
     Bass21DSP dsp_;
     iplug::OverSampler<float> ovs_;
