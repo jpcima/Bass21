@@ -34,14 +34,6 @@ struct Processor::Impl {
         std::atomic<float> *treble;
         std::atomic<float> *quality;
     } param_;
-
-    //==========================================================================
-    template <class Parameter> class NonAutomatable : public Parameter {
-    public:
-        using Parameter::Parameter;
-        virtual ~NonAutomatable() {}
-        virtual bool isAutomatable() const override { return false; }
-    };
 };
 
 //==============================================================================
@@ -316,7 +308,8 @@ std::unique_ptr<juce::AudioProcessorValueTreeState> Processor::Impl::setupParame
                     0.0f,
                     1.0f,
                     0.5f),
-                std::make_unique<NonAutomatable<juce::AudioParameterChoice>>(
+                /* NOTE: marking as non-automatable troubles Ardour6 */
+                std::make_unique<juce::AudioParameterChoice>(
                     "quality",
                     "Quality",
                     juce::StringArray{"Low", "Medium", "High", "Very high"},
