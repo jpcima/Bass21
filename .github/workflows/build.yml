@@ -95,26 +95,43 @@ jobs:
   build_for_mod:
     runs-on: ubuntu-20.04
     container:
-      image: jpcima/mod-plugin-builder
+      image: jpcima/mod-plugin-builder:modduo
       options: --user 0
     steps:
-    - uses: actions/checkout@v2
-      with:
-        submodules: recursive
     - name: Fix up MOD environment
       shell: bash
       run: ln -sf /home/builder/mod-workdir ~/mod-workdir
+    - name: Update git
+      shell: bash
+      run: |
+        sudo apt-get -y update
+        sudo apt-get -y install software-properties-common
+        sudo add-apt-repository -y ppa:git-core/ppa
+        sudo apt-get -y update
+        sudo apt-get -y install git
+    - uses: actions/checkout@v2
+      with:
+        submodules: recursive
     - name: Create Build Environment
+      shell: bash
       working-directory: ${{runner.workspace}}
-      run: mod-plugin-builder /usr/local/bin/cmake -E make_directory build
+      run: |
+        pushd /home/builder/mod-plugin-builder && . local.env modduo && popd && \
+          cmake -E make_directory build
     - name: Configure CMake
+      shell: bash
       working-directory: ${{runner.workspace}}/build
       run: |
-       mod-plugin-builder /usr/local/bin/cmake "${GITHUB_WORKSPACE}" -DCMAKE_BUILD_TYPE="${BUILD_TYPE}" -DCMAKE_CXX_STANDARD=17 -DBASS21_JUCE=OFF
+        pushd /home/builder/mod-plugin-builder && . local.env modduo && popd && \
+          cmake "${GITHUB_WORKSPACE}" -DCMAKE_BUILD_TYPE="${BUILD_TYPE}" -DCMAKE_CXX_STANDARD=17 -DBASS21_JUCE=OFF
     - name: Build
+      shell: bash
       working-directory: ${{runner.workspace}}/build
-      run: mod-plugin-builder /usr/local/bin/cmake --build . --config "${BUILD_TYPE}" -- -j 2
+      run: |
+        pushd /home/builder/mod-plugin-builder && . local.env modduo && popd && \
+          cmake --build . --config "${BUILD_TYPE}" -- -j 2
     - name: Print file list
+      shell: bash
       working-directory: ${{runner.workspace}}/build
       run: ls -lR
     - uses: actions/upload-artifact@v2
