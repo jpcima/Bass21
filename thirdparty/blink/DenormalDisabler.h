@@ -69,14 +69,14 @@ class DenormalDisabler {
 
   inline void restoreState() { setCSR(m_savedCSR); }
 
-  inline int getCSR() {
-    int result;
+  inline unsigned int getCSR() {
+    unsigned int result;
     asm volatile("stmxcsr %0" : "=m"(result));
     return result;
   }
 
-  inline void setCSR(int a) {
-    int temp = a;
+  inline void setCSR(unsigned int a) {
+    unsigned int temp = a;
     asm volatile("ldmxcsr %0" : : "m"(temp));
   }
 
