@@ -392,3 +392,20 @@ tf62t(b0,b1,b2,b3,b4,b5,b6,a1,a2,a3,a4,a5,a6) = calc with {
 symmetric_highshelf(N,Lpi,fx) = fi.highshelf(N,Lpi,sfx) with {
   sfx = ba.if(Lpi>0, fx, fi.highshelf_other_freq(N, ma.neg(Lpi), fx));
 };
+
+//------------------------------------------------------------------------------
+// Utility
+//------------------------------------------------------------------------------
+
+// copysign function from C99
+copysign = ffunction(float copysignf|copysign|copysignl(float,float),<math.h>,"");
+
+// linear smoother, flushable
+lfsmooth(tau, flush, tgt) =
+  ((+:(_,tgt):select2(flush))~_)~((tgt-_)<:(abs,(/(tau*ma.SR):(select2(sc)~_):abs),_):(min,_):copysign)
+with {
+  sc = (tgt!=tgt');//|(tau!=tau')
+};
+
+// linear smoother
+lsmooth(tau) = lfsmooth(tau, 0);
