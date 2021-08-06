@@ -193,7 +193,7 @@ class Bass21DSP {
 		double fConst11 = (4.1229055999999999e-10 * fConst0);
 		fConst12 = (1.0 / ((fConst0 * ((fConst0 * (fConst11 + 5.3921471999999997e-06)) + 0.0065295999999999991)) + 1.0));
 		fConst13 = ((fConst0 * ((fConst0 * (fConst11 + 2.8110719999999996e-07)) + 0.0021295999999999997)) + 1.0);
-		fConst14 = std::exp((0.0 - (200.0 / fConst0)));
+		fConst14 = std::exp((0.0 - (138.19999999999999 / fConst0)));
 		fConst15 = (1.0 - fConst14);
 		double fConst16 = Bass21DSP_faustpower3_f(fConst0);
 		double fConst17 = (0.0 - (24.0 * fConst16));
