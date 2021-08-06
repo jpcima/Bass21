@@ -4,19 +4,16 @@ declare author "JPC";
 declare license "AGPL-3.0-or-later";
 //NOTE: requires -double
 
-process = bass21(ctrl.pregain, ctrl.level, ctrl.blend, ctrl.presence, ctrl.drive, ctrl.bass, ctrl.treble);
-
-ctrl = environment {
+process = bass21(pregain, level, blend, presence, drive, bass, treble) with {
   begin = checkbox("[0] begin");
-  pregain = hslider("[1] pregain", 0.5, 0.0, 1.0, 0.001) : si.smooth(smoothPole);
-  level = hslider("[2] level", 0.5, 0.0, 1.0, 0.001) : si.smooth(smoothPole);
-  blend = hslider("[3] blend", 0.5, 0.0, 1.0, 0.001) : si.smooth(smoothPole);
-  presence = hslider("[4] presence", 0.5, 0.0, 1.0, 0.001) : si.polySmooth(begin, smoothPole, 0);
-  drive = hslider("[5] drive", 0.5, 0.0, 1.0, 0.001) : si.polySmooth(begin, smoothPole, 0);
-  bass = hslider("[6] bass", 0.5, 0.0, 1.0, 0.001);
-  treble = hslider("[7] treble", 0.5, 0.0, 1.0, 0.001);
-  smoothT60 = 50e-3;
-  smoothPole = ba.tau2pole(smoothT60/6.91);
+  pregain = hslider("[1] pregain", 0.5, 0.0, 1.0, 0.001) : si.smooth(pole);
+  level = hslider("[2] level", 0.5, 0.0, 1.0, 0.001) : si.smooth(pole);
+  blend = hslider("[3] blend", 0.5, 0.0, 1.0, 0.001) : si.smooth(pole);
+  presence = hslider("[4] presence", 0.5, 0.0, 1.0, 0.001) : si.polySmooth(begin, pole, 0);
+  drive = hslider("[5] drive", 0.5, 0.0, 1.0, 0.001) : si.polySmooth(begin, pole, 0);
+  bass = hslider("[6] bass", 0.5, 0.0, 1.0, 0.001) : si.polySmooth(begin, pole, 0);
+  treble = hslider("[7] treble", 0.5, 0.0, 1.0, 0.001) : si.polySmooth(begin, pole, 0);
+  pole = ba.tau2pole(50e-3/6.91);
 };
 
 //------------------------------------------------------------------------------
@@ -206,9 +203,7 @@ with {
 };
 
 bass21EQ(bass_, treble_) =
-  smoothAnalogSixthOrder(
-    lfsmooth(ctrl.smoothT60, ctrl.begin),
-    B0, B1, B2, B3, B4, B5, B6, A0, A1, A2, A3, A4, A5, A6)
+  analogSixthOrder(B0, B1, B2, B3, B4, B5, B6, A0, A1, A2, A3, A4, A5, A6)
 with {
   //formula refers to control values inverted
   bass = 1.0-bass_;
@@ -312,8 +307,7 @@ with {
 };
 
 analogThirdOrder(B0, B1, B2, B3, A0, A1, A2, A3) =
-  tf32t(b0/a0, b1/a0, b2/a0, b3/a0, a1/a0, a2/a0, a3/a0)
-  //fi.tf3(b0/a0, b1/a0, b2/a0, b3/a0, a1/a0, a2/a0, a3/a0)
+  fi.tf3(b0/a0, b1/a0, b2/a0, b3/a0, a1/a0, a2/a0, a3/a0)
 with {
   // bilinear transform (not prewarped)
   b0 = k*k*k*B3 + k*k*B2 + B1*k + B0;
@@ -327,12 +321,9 @@ with {
   k = 2.0*ma.SR;
 };
 
-smoothAnalogSixthOrder(s, B0, B1, B2, B3, B4, B5, B6, A0, A1, A2, A3, A4, A5, A6) =
-  //NOTE: s is a smoothing function for coefficients
-  tf62t(s(b0/a0), s(b1/a0), s(b2/a0), s(b3/a0), s(b4/a0), s(b5/a0), s(b6/a0),
-        s(a1/a0), s(a2/a0), s(a3/a0), s(a4/a0), s(a5/a0), s(a6/a0))
-  //fi.iir((s(b0/a0), s(b1/a0), s(b2/a0), s(b3/a0), s(b4/a0), s(b5/a0), s(b6/a0)),
-  //       (s(a1/a0), s(a2/a0), s(a3/a0), s(a4/a0), s(a5/a0), s(a6/a0)))
+analogSixthOrder(B0, B1, B2, B3, B4, B5, B6, A0, A1, A2, A3, A4, A5, A6) =
+  fi.iir((b0/a0, b1/a0, b2/a0, b3/a0, b4/a0, b5/a0, b6/a0),
+         (a1/a0, a2/a0, a3/a0, a4/a0, a5/a0, a6/a0))
 with {
   // bilinear transform (not prewarped)
   b0 = B6*(k*k*k*k*k*k) + B5*(k*k*k*k*k) + B4*(k*k*k*k) + B3*(k*k*k) + B2*(k*k) + B1*k + B0;
