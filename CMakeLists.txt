@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.14)
 project(Bass21 VERSION "0.0.1" LANGUAGES C CXX)
 
 list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
@@ -11,6 +11,7 @@ set(CMAKE_CXX_VISIBILITY_PRESET "hidden")
 set(CMAKE_VISIBILITY_INLINES_HIDDEN ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
+include(FetchContent)
 find_package(PkgConfig)
 
 #------------------------------------------------------------------------------#
@@ -20,7 +21,15 @@ find_package(PkgConfig)
 option(BASS21_JUCE "Build a JUCE plugin" ON)
 
 if(BASS21_JUCE)
-  add_subdirectory("thirdparty/JUCE" EXCLUDE_FROM_ALL)
+  FetchContent_Declare(juce
+    URL "https://github.com/juce-framework/JUCE/archive/refs/tags/6.1.2.tar.gz"
+    URL_HASH "SHA512=0427be40e9cea3b215358f0661e9dabcbc4f1be7aba7d0f44e35f8426dd49ba31da99d0f18a6ee28b3dce50114a1647157802e6231d9b912269f179191ebccc1")
+
+  FetchContent_GetProperties(juce)
+  if(NOT juce_POPULATED)
+    FetchContent_Populate(juce)
+    add_subdirectory("${juce_SOURCE_DIR}" "${juce_BINARY_DIR}" EXCLUDE_FROM_ALL)
+  endif()
 
   juce_add_plugin(Bass21
     PLUGIN_CODE Bs21
