@@ -28,7 +28,7 @@ public:
 
 private:
     static constexpr int maxFramesPerSegment = 512;
-    static constexpr float fadeDelay = 100e-3;
+    static constexpr float fadeDelay = 100e-3f;
     //
     double sampleRate_ = 44100.0;
     int effectiveOvsFactorLog2_ = -1;

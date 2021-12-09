@@ -9,13 +9,13 @@ constexpr float Bass21::fadeDelay;
 void Bass21::init()
 {
     Bass21DSP &dsp = dsp_;
-    dsp.init(sampleRate_);
+    dsp.init((int)sampleRate_);
 }
 
 void Bass21::clear()
 {
     Bass21DSP &dsp = dsp_;
-    dsp.instanceConstants(sampleRate_);
+    dsp.instanceConstants((int)sampleRate_);
     dsp.instanceClear();
     dsp.setBegin(true);
 
@@ -52,7 +52,7 @@ void Bass21::run(const float *input, float *output, int numFrames)
     factorLog2 = (factorLog2 > maxFactorLog2) ? maxFactorLog2 : factorLog2;
 
     if (factorLog2 != effectiveOvsFactorLog2_) {
-        dsp.instanceConstants(sampleRate * (1 << factorLog2));
+        dsp.instanceConstants((int)(sampleRate * (1 << factorLog2)));
         dsp.instanceClear();
         dsp.setBegin(true);
         ovs.SetOverSampling((iplug::EFactor)factorLog2);

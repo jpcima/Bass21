@@ -240,7 +240,7 @@ public:
     if(factor != mFactor)
     {
       mFactor = factor;
-      mRate = std::pow(2, (int) factor);
+      mRate = 1 << (int) factor;
 
       Reset();
     }

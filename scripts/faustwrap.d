@@ -1,5 +1,33 @@
 #!/usr/bin/env rdmd
 
+/* Copyright (c) 2021, Jean Pierre Cimalando
+ *
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without modification,
+ * are permitted provided that the following conditions are met:
+ *
+ *     * Redistributions of source code must retain the above copyright notice,
+ *       this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright notice,
+ *       this list of conditions and the following disclaimer in the documentation
+ *       and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER
+ * OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+ * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+ * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ * SPDX-License-Identifier: BSD-2-Clause
+ */
+
 import std.conv;
 import std.algorithm;
 import std.getopt;
@@ -109,14 +137,21 @@ void main(string[] args)
         code = removeMethod(code, method);
     foreach (string method; ["getNumInputs", "getNumOutputs"])
         code = makeMethodStaticConstexpr(code, method);
+    if (opts.oneSample)
+    {
+        foreach (string method; ["getNumIntControls", "getNumRealControls"])
+            code = makeMethodStaticConstexpr(code, method);
+    }
     if (!opts.superclassName)
-        code = removeSuperclass(code);
+        code = removeSuperclass(code, opts.oneSample ? "one_sample_dsp" : "dsp");
     code = makePointerArgsConst(code, opts.oneSample);
     code = addParameters(code, params);
 
     foreach (string method; ["compute", "classInit", "instanceConstants", "instanceResetUserInterface", "instanceClear", "init", "instanceInit"])
         code = addMethodStartEnd(code, method);
     code = addClassStartEnd(code);
+
+    code = cleanupWhitespace(code);
 
     File outFile = stdout;
     if (opts.outputPath)
@@ -198,7 +233,7 @@ string makeMethodStaticConstexpr(string code, string method)
     string[] newLines;
     newLines.reserve(1024);
 
-    auto expr = regex(`^(\s*)(.*\b` ~ method.escaper.to!string ~ `\s*\(.*\{\s*)$`);
+    auto expr = regex(`^(\s*)(.*\b` ~ method.escaper.to!string ~ `\s*\(.*\{.*)$`);
 
     foreach (string line; code.lineSplitter)
     {
@@ -212,9 +247,9 @@ string makeMethodStaticConstexpr(string code, string method)
     return newLines.join('\n');
 }
 
-string removeSuperclass(string code)
+string removeSuperclass(string code, string superClassName)
 {
-    auto expr = regex(`\s*:\s*public\s+dsp\s*`);
+    auto expr = regex(`\s*:\s*public\s+` ~ superClassName.escaper.to!string ~ `\s*`);
     return code.replaceFirst(expr, " ");
 }
 
@@ -272,9 +307,9 @@ string addParameters(string code, Parameter[] params)
     {
         string camelName = param.name.camelify;
         addedLines ~= "";
-        addedLines ~= format(`    FAUSTFLOAT get%s() const { return %s; }`, camelName, param.var);
+        addedLines ~= format("\tFAUSTFLOAT get%s() const { return %s; }", camelName, param.var);
         if (!param.readonly)
-            addedLines ~= format(`    void set%s(FAUSTFLOAT value) { %s = value; }`, camelName, param.var);
+            addedLines ~= format("\tvoid set%s(FAUSTFLOAT value) { %s = value; }", camelName, param.var);
     }
 
     return addToClass(code, addedLines.join('\n'));
@@ -347,6 +382,19 @@ string addToClass(string code, string addend)
     auto match = code.matchLast(expr);
     ulong index = match[0].ptr - code.ptr;
     return code[0..index] ~ addend ~ '\n' ~ code[index..$];
+}
+
+string cleanupWhitespace(string code)
+{
+    string[] newLines;
+    newLines.reserve(1024);
+
+    foreach (string line; code.lineSplitter)
+    {
+        newLines ~= line.stripRight;
+    }
+
+    return newLines.join('\n');
 }
 
 string camelify(string name)
