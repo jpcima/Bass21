@@ -19,6 +19,7 @@ find_package(PkgConfig)
 #------------------------------------------------------------------------------#
 
 option(BASS21_JUCE "Build a JUCE plugin" ON)
+option(BASS21_COPY_AFTER_BUILD "Copy the JUCE plugin after build" OFF)
 
 if(BASS21_JUCE)
   FetchContent_Declare(juce
@@ -44,7 +45,7 @@ if(BASS21_JUCE)
     EDITOR_WANTS_KEYBOARD_FOCUS FALSE
     VST3_CATEGORIES "Fx Distortion EQ Filter"
     AU_MAIN_TYPE "kAudioUnitType_MusicEffect"
-    COPY_PLUGIN_AFTER_BUILD FALSE
+    COPY_PLUGIN_AFTER_BUILD "${BASS21_COPY_AFTER_BUILD}"
     NEEDS_CURL FALSE
     NEEDS_WEB_BROWSER FALSE)
 
