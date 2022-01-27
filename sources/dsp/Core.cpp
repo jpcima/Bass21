@@ -3,8 +3,26 @@
 #include <cstdio>
 #include <cstring>
 
+#if defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wsign-conversion"
+#endif
+#include <Oversampler.h>
+#if defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif
+
 constexpr int Bass21::maxFramesPerSegment;
 constexpr float Bass21::fadeDelay;
+
+Bass21::Bass21()
+    : ovs_(new iplug::OverSampler<float>)
+{
+}
+
+Bass21::~Bass21()
+{
+}
 
 void Bass21::init()
 {
@@ -19,7 +37,7 @@ void Bass21::clear()
     dsp.instanceClear();
     dsp.setBegin(true);
 
-    ovs_.Reset();
+    ovs_->Reset();
     effectiveOvsFactorLog2_ = -1;
     suspended_ = false;
     bypassFade_ = bypass_;
@@ -41,7 +59,7 @@ void Bass21::run(const float *input, float *output, int numFrames)
 
     ///
     DSP &dsp = dsp_;
-    iplug::OverSampler<float> &ovs = ovs_;
+    iplug::OverSampler<float> &ovs = *ovs_;
 
     //TODO optimize log2
     int desiredFactorLog2 = (int)std::ceil(std::log2(44100.0 * (1 << quality) / sampleRate));

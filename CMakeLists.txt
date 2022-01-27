@@ -15,6 +15,42 @@ include(FetchContent)
 find_package(PkgConfig)
 
 #------------------------------------------------------------------------------#
+# DSP core                                                                     #
+#------------------------------------------------------------------------------#
+
+add_library(Bass21DSP STATIC EXCLUDE_FROM_ALL
+  "sources/dsp/Core.h"
+  "sources/dsp/Core.cpp")
+
+target_include_directories(Bass21DSP
+  PUBLIC
+  "sources")
+
+add_faust_command(
+  "sources/dsp/Bass21Faust.dsp"
+  "sources/dsp/Bass21Faust.hxx"
+  IN_PLACE
+  DOUBLE
+  MATH_APPROXIMATION
+  CLASS_NAME "Bass21FaustDSP"
+  IMPORT_DIRS "sources/dsp")
+
+target_sources(Bass21DSP PRIVATE
+  "sources/dsp/Bass21Faust.hxx")
+
+target_include_directories(Bass21DSP PRIVATE
+  "thirdparty/iPlug2"
+  "thirdparty/hiir-1.33"
+  "thirdparty/blink"
+  "thirdparty/DISTRHO/sources")
+
+if(MSVC)
+  target_compile_options(Bass21DSP PRIVATE "/fp:fast")
+else()
+  target_compile_options(Bass21DSP PRIVATE "-ffast-math")
+endif()
+
+#------------------------------------------------------------------------------#
 # JUCE plugin                                                                  #
 #------------------------------------------------------------------------------#
 
@@ -61,43 +97,16 @@ if(BASS21_JUCE)
     "sources/plugin/Processor.h"
     "sources/plugin/Processor.cpp"
     "sources/plugin/Editor.h"
-    "sources/plugin/Editor.cpp"
-    "sources/dsp/Core.h"
-    "sources/dsp/Core.cpp"
-    "sources/dsp/Bass21Faust.hxx")
-
-  add_faust_command(
-    "sources/dsp/Bass21Faust.dsp"
-    "sources/dsp/Bass21Faust.hxx"
-    IN_PLACE
-    DOUBLE
-    MATH_APPROXIMATION
-    CLASS_NAME "Bass21FaustDSP"
-    IMPORT_DIRS "sources/dsp")
-
-  target_include_directories(Bass21
-    PRIVATE
-    "sources")
+    "sources/plugin/Editor.cpp")
 
   target_link_libraries(Bass21
     PRIVATE
+    Bass21DSP
     juce::juce_audio_processors
     juce::juce_opengl
     juce::juce_recommended_config_flags
     juce::juce_recommended_lto_flags
     juce::juce_recommended_warning_flags)
-
-  if(MSVC)
-    target_compile_options(Bass21 PRIVATE "/fp:fast")
-  else()
-    target_compile_options(Bass21 PRIVATE "-ffast-math")
-  endif()
-
-  ###
-  target_include_directories(Bass21 PRIVATE
-    "thirdparty/iPlug2"
-    "thirdparty/hiir-1.33"
-    "thirdparty/blink")
 endif()
 
 #------------------------------------------------------------------------------#
@@ -110,14 +119,12 @@ if(BASS21_LV2)
   pkg_check_modules(LV2 "lv2" REQUIRED)
 
   add_library(Bass21_LV2 MODULE
-    "sources/lv2/LV2Plugin.cpp"
-    "sources/dsp/Core.h"
-    "sources/dsp/Core.cpp")
+    "sources/lv2/LV2Plugin.cpp")
 
-  target_include_directories(Bass21_LV2
-    PRIVATE
-    "sources")
   target_link_libraries(Bass21_LV2
+    PRIVATE
+    Bass21DSP)
+  target_include_directories(Bass21_LV2
     PRIVATE
     ${LV2_INCLUDE_DIRS})
   set_target_properties(Bass21_LV2 PROPERTIES
@@ -153,9 +160,4 @@ if(BASS21_LV2)
     add_dependencies(Bass21_LV2 "Bass21_LV2_FileCopy_${_filecounter}")
     math(EXPR _filecounter "${_filecounter}+1")
   endforeach()
-
-  target_include_directories(Bass21_LV2 PRIVATE
-    "thirdparty/iPlug2"
-    "thirdparty/hiir-1.33"
-    "thirdparty/blink")
 endif()

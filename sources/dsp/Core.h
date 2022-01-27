@@ -1,16 +1,14 @@
 #pragma once
 #include "dsp/Bass21Faust.hxx"
-#if defined(__GNUC__)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wsign-conversion"
-#endif
-#include <Oversampler.h>
-#if defined(__GNUC__)
-#pragma GCC diagnostic pop
-#endif
+#include <memory>
+
+namespace iplug { template <class T> class OverSampler; }
 
 class Bass21 {
 public:
+    Bass21();
+    ~Bass21();
+
     void init();
     void clear();
     void setSampleRate(double sampleRate);
@@ -40,7 +38,7 @@ private:
     //
     using DSP = Bass21FaustDSP;
     DSP dsp_;
-    iplug::OverSampler<float> ovs_;
+    std::unique_ptr<iplug::OverSampler<float>> ovs_;
     //
     float copyBuffer_[maxFramesPerSegment];
 };
