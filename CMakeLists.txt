@@ -64,15 +64,15 @@ if(BASS21_JUCE)
     "sources/plugin/Editor.cpp"
     "sources/dsp/Core.h"
     "sources/dsp/Core.cpp"
-    "sources/dsp/Bass21.hxx")
+    "sources/dsp/Bass21Faust.hxx")
 
   add_faust_command(
-    "sources/dsp/Bass21.dsp"
-    "sources/dsp/Bass21.hxx"
+    "sources/dsp/Bass21Faust.dsp"
+    "sources/dsp/Bass21Faust.hxx"
     IN_PLACE
     DOUBLE
     MATH_APPROXIMATION
-    CLASS_NAME "Bass21DSP"
+    CLASS_NAME "Bass21FaustDSP"
     IMPORT_DIRS "sources/dsp")
 
   target_include_directories(Bass21

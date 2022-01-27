@@ -8,13 +8,13 @@ constexpr float Bass21::fadeDelay;
 
 void Bass21::init()
 {
-    Bass21DSP &dsp = dsp_;
+    Bass21FaustDSP &dsp = dsp_;
     dsp.init((int)sampleRate_);
 }
 
 void Bass21::clear()
 {
-    Bass21DSP &dsp = dsp_;
+    Bass21FaustDSP &dsp = dsp_;
     dsp.instanceConstants((int)sampleRate_);
     dsp.instanceClear();
     dsp.setBegin(true);
@@ -40,7 +40,7 @@ void Bass21::run(const float *input, float *output, int numFrames)
     const int quality = quality_;
 
     ///
-    Bass21DSP &dsp = dsp_;
+    Bass21FaustDSP &dsp = dsp_;
     iplug::OverSampler<float> &ovs = ovs_;
 
     //TODO optimize log2

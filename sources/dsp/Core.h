@@ -1,5 +1,5 @@
 #pragma once
-#include "dsp/Bass21.hxx"
+#include "dsp/Bass21Faust.hxx"
 #if defined(__GNUC__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wsign-conversion"
@@ -38,7 +38,7 @@ private:
     bool bypass_ = false;
     int quality_ = 0;
     //
-    Bass21DSP dsp_;
+    Bass21FaustDSP dsp_;
     iplug::OverSampler<float> ovs_;
     //
     float copyBuffer_[maxFramesPerSegment];
