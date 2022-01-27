@@ -38,7 +38,8 @@ private:
     bool bypass_ = false;
     int quality_ = 0;
     //
-    Bass21FaustDSP dsp_;
+    using DSP = Bass21FaustDSP;
+    DSP dsp_;
     iplug::OverSampler<float> ovs_;
     //
     float copyBuffer_[maxFramesPerSegment];
