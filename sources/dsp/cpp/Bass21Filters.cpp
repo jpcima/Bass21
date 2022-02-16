@@ -1,6 +1,6 @@
 #include "Bass21Filters.h"
 
-TF6d eqFilter(double sampleRate, double bass, double treble)
+TF6d makeEQ(double sampleRate, double bass, double treble)
 {
     TF6d analog;
     double *B = analog.b();
@@ -90,4 +90,44 @@ TF6d eqFilter(double sampleRate, double bass, double treble)
       -((117489690137807889841496944427490234375.0/24519928653854221733733552434404946937899825954937634816.0)*bass*(bass - (1.0))*(0.0 - (1000.0)*(treble*treble) + (1000.0)*treble + (33.0)));
 
   return bilinearTransform6(analog, sampleRate, 1.0);
+}
+
+//------------------------------------------------------------------------------
+static FilterCache::Ptr computeFilterCache(uint32_t sampleRate)
+{
+    FilterCache::Ptr fc{new FilterCache};
+
+    constexpr uint32_t size = 128;
+
+    for (uint32_t ib = 0; ib < size; ++ib) {
+        double bass = ib / (double)(size - 1);
+        for (uint32_t it = 0; it < size; ++it) {
+            double treble = it / (double)(size - 1);
+            fc->eq[ib][it] = makeEQ(sampleRate, bass, treble).to<float>();
+        }
+    }
+
+    return fc;
+}
+
+//------------------------------------------------------------------------------
+#include <map>
+#include <mutex>
+
+static std::map<uint32_t, FilterCache::Ptr> globalFilterCache;
+static std::mutex globalFilterCacheMutex;
+
+FilterCache::Ptr getFilterCache(uint32_t sampleRate)
+{
+    std::unique_lock<std::mutex> lock{globalFilterCacheMutex};
+
+    auto it = globalFilterCache.find(sampleRate);
+    if (it != globalFilterCache.end())
+        return it->second;
+
+    lock.unlock();
+    FilterCache::Ptr fc = computeFilterCache(sampleRate);
+    lock.lock();
+
+    return globalFilterCache.insert(std::make_pair(sampleRate, fc)).first->second;
 }
