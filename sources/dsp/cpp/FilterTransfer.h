@@ -57,6 +57,24 @@ TF<Real, Ord> interpolateTF(const TF<Real, Ord> &tf1, const TF<Real, Ord> &tf2, 
 
 //------------------------------------------------------------------------------
 template <class Real, uint32_t Ord>
+bool operator==(const TF<Real, Ord> &tf1, const TF<Real, Ord> &tf2)
+{
+    const Real *coef1 = tf1.coef;
+    const Real *coef2 = tf2.coef;
+    int equal = 1;
+    for (uint32_t i = 0, n = 2 * (Ord + 1); i < n; ++i)
+        equal &= (coef1[i] == coef2[i]);
+    return (bool)equal;
+}
+
+template <class Real, uint32_t Ord>
+bool operator!=(const TF<Real, Ord> &tf1, const TF<Real, Ord> &tf2)
+{
+    return !operator==(tf1, tf2);
+}
+
+//------------------------------------------------------------------------------
+template <class Real, uint32_t Ord>
 std::ostream &operator<<(std::ostream &os, const TF<Real, Ord> &tf)
 {
     os << "b=[";
