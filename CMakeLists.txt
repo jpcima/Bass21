@@ -49,7 +49,9 @@ if(BASS21_USE_FAUST_DSP)
 else()
   target_sources(Bass21DSP PRIVATE
     "sources/dsp/Bass21Cpp.cpp"
-    "sources/dsp/Bass21Cpp.h")
+    "sources/dsp/Bass21Cpp.h"
+    "sources/dsp/cpp/FilterTransfer.cpp"
+    "sources/dsp/cpp/FilterTransfer.h")
 endif()
 
 target_include_directories(Bass21DSP
