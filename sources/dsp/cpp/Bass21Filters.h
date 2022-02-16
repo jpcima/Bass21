@@ -25,6 +25,10 @@ struct FilterCache : std::enable_shared_from_this<FilterCache> {
     TF3f camelFilter;
     TF2f simpleActive1;
     TF6f eq[TableSize][TableSize]; // [bass][treble]
+
+    TF2f getPresence(float param) const;
+    TF2f getDrive(float param) const;
+    TF6f getEQ(float bass, float treble) const;
 };
 
 //------------------------------------------------------------------------------

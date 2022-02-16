@@ -2,7 +2,7 @@
 
 TF2d makePresence(double sampleRate, double param)
 {
-    TF2d analog;
+    TF2d analog{UninitializedTag{}};
     double *B = analog.b();
     double *A = analog.a();
 
@@ -24,7 +24,7 @@ TF2d makePresence(double sampleRate, double param)
 
 TF2d makeDrive(double sampleRate, double param)
 {
-    TF2d analog;
+    TF2d analog{UninitializedTag{}};
     double *B = analog.b();
     double *A = analog.a();
 
@@ -45,7 +45,7 @@ TF2d makeDrive(double sampleRate, double param)
 
 TF3d makeRCNetwork1(double sampleRate)
 {
-    TF3d analog;
+    TF3d analog{UninitializedTag{}};
     double *B = analog.b();
     double *A = analog.a();
 
@@ -70,7 +70,7 @@ TF3d makeRCNetwork1(double sampleRate)
 
 TF2d makeRCNetwork2(double sampleRate)
 {
-    TF2d analog;
+    TF2d analog{UninitializedTag{}};
     double *B = analog.b();
     double *A = analog.a();
 
@@ -91,7 +91,7 @@ TF2d makeRCNetwork2(double sampleRate)
 
 TF3d makeCamelFilter(double sampleRate)
 {
-    TF3d analog;
+    TF3d analog{UninitializedTag{}};
     double *B = analog.b();
     double *A = analog.a();
 
@@ -118,7 +118,7 @@ TF3d makeCamelFilter(double sampleRate)
 
 TF2d makeSimpleActive1(double sampleRate)
 {
-    TF2d analog;
+    TF2d analog{UninitializedTag{}};
     double *B = analog.b();
     double *A = analog.a();
 
@@ -139,7 +139,7 @@ TF2d makeSimpleActive1(double sampleRate)
 
 TF6d makeEQ(double sampleRate, double bass, double treble)
 {
-    TF6d analog;
+    TF6d analog{UninitializedTag{}};
     double *B = analog.b();
     double *A = analog.a();
 
@@ -260,6 +260,50 @@ static FilterCache::Ptr computeFilterCache(uint32_t sampleRate)
     }
 
     return fc;
+}
+
+template <class Real, uint32_t Ord, uint32_t Count>
+static TF<Real, Ord> getTFInterpolated1D(const TF<Real, Ord> (&table)[Count], Real param)
+{
+    Real index = param * (Count - 1);
+    uint32_t i1 = (uint32_t)index;
+    Real frac = index - (Real)i1;
+    uint32_t i2 = (i1 + 1 < Count) ? (i1 + 1) : (Count - 1);
+    return interpolateTF(table[i1], table[i2], frac);
+}
+
+template <class Real, uint32_t Ord, uint32_t Count>
+static TF<Real, Ord> getTFInterpolated2D(const TF<Real, Ord> (&table)[Count][Count], Real param1, Real param2)
+{
+    Real dim1_index = param1 * (Count - 1);
+    uint32_t dim1_i1 = (uint32_t)dim1_index;
+    Real dim1_frac = dim1_index - (Real)dim1_i1;
+    uint32_t dim1_i2 = (dim1_i1 + 1 < Count) ? (dim1_i1 + 1) : (Count - 1);
+
+    Real dim2_index = param2 * (Count - 1);
+    uint32_t dim2_i1 = (uint32_t)dim2_index;
+    Real dim2_frac = dim2_index - (Real)dim2_i1;
+    uint32_t dim2_i2 = (dim2_i1 + 1 < Count) ? (dim2_i1 + 1) : (Count - 1);
+
+    return interpolateTF(
+        interpolateTF(table[dim1_i1][dim2_i1], table[dim1_i1][dim2_i2], dim2_frac),
+        interpolateTF(table[dim1_i2][dim2_i1], table[dim1_i2][dim2_i2], dim2_frac),
+        dim1_frac);
+}
+
+TF2f FilterCache::getPresence(float param) const
+{
+    return getTFInterpolated1D(presence, param);
+}
+
+TF2f FilterCache::getDrive(float param) const
+{
+    return getTFInterpolated1D(drive, param);
+}
+
+TF6f FilterCache::getEQ(float bass, float treble) const
+{
+    return getTFInterpolated2D(eq, bass, treble);
 }
 
 //------------------------------------------------------------------------------

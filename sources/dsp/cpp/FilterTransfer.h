@@ -2,13 +2,20 @@
 #include <iostream>
 #include <cstdint>
 
+struct UninitializedTag {};
+
+//------------------------------------------------------------------------------
 template <class Real, uint32_t Ord>
 struct TF
 {
+    TF() noexcept : coef{} {}
+    explicit TF(UninitializedTag) noexcept {}
+
+    //--------------------------------------------------------------------------
     static_assert(Ord >= 1, "Invalid filter order");
 
     //--------------------------------------------------------------------------
-    Real coef[2 * (Ord + 1)] {};
+    Real coef[2 * (Ord + 1)];
 
     //--------------------------------------------------------------------------
     Real *b() noexcept { return coef; }
@@ -19,7 +26,7 @@ struct TF
     //--------------------------------------------------------------------------
     TF<Real, Ord> normalized() const noexcept
     {
-        TF<Real, Ord> res;
+        TF<Real, Ord> res{UninitializedTag{}};
         const Real a0 = a()[0];
         for (uint32_t i = 0, n = 2 * (Ord + 1); i < n; ++i)
             res.coef[i] = coef[i] / a0;
@@ -29,12 +36,24 @@ struct TF
     //--------------------------------------------------------------------------
     template <class Real2> TF<Real2, Ord> to() const noexcept
     {
-        TF<Real2, Ord> res;
+        TF<Real2, Ord> res{UninitializedTag{}};
         for (uint32_t i = 0, n = 2 * (Ord + 1); i < n; ++i)
             res.coef[i] = (Real2)coef[i];
         return res;
     }
 };
+
+//------------------------------------------------------------------------------
+template <class Real, uint32_t Ord>
+TF<Real, Ord> interpolateTF(const TF<Real, Ord> &tf1, const TF<Real, Ord> &tf2, Real factor) noexcept
+{
+    TF<Real, Ord> res{UninitializedTag{}};
+    const Real *coef1 = tf1.coef;
+    const Real *coef2 = tf2.coef;
+    for (uint32_t i = 0, n = 2 * (Ord + 1); i < n; ++i)
+        res.coef[i] = coef1[i] + factor * (coef2[i] - coef1[i]);
+    return res;
+}
 
 //------------------------------------------------------------------------------
 template <class Real, uint32_t Ord>
