@@ -53,7 +53,8 @@ else()
     "sources/dsp/cpp/Bass21Filters.cpp"
     "sources/dsp/cpp/Bass21Filters.h"
     "sources/dsp/cpp/FilterTransfer.cpp"
-    "sources/dsp/cpp/FilterTransfer.h")
+    "sources/dsp/cpp/FilterTransfer.h"
+    "sources/dsp/cpp/Filter.h")
 endif()
 
 target_include_directories(Bass21DSP

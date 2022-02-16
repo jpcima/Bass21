@@ -1,4 +1,5 @@
 #include "dsp/cpp/Bass21Filters.h"
+#include "dsp/cpp/Filter.h"
 #include <chrono>
 #include <iostream>
 namespace kro = std::chrono;

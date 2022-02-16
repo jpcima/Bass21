@@ -26,11 +26,17 @@ struct TF
     //--------------------------------------------------------------------------
     TF<Real, Ord> normalized() const noexcept
     {
-        TF<Real, Ord> res{UninitializedTag{}};
         const Real a0 = a()[0];
-        for (uint32_t i = 0, n = 2 * (Ord + 1); i < n; ++i)
-            res.coef[i] = coef[i] / a0;
-        return res;
+        if (a0 == 1)
+            return *this;
+        else {
+            TF<Real, Ord> res{UninitializedTag{}};
+            const Real r0 = 1 / a0;
+            for (uint32_t i = 0; i <= Ord; ++i) res.b()[i] = r0 * b()[i];
+            res.a()[0] = 1;
+            for (uint32_t i = 1; i <= Ord; ++i) res.a()[i] = r0 * a()[i];
+            return res;
+        }
     }
 
     //--------------------------------------------------------------------------
