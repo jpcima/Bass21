@@ -93,11 +93,10 @@ void Bass21::run(const float *input, float *output, int numFrames)
 
     //TODO optimize log2
     int desiredFactorLog2 = (int)std::ceil(std::log2(44100.0 * (1 << quality) / sampleRate));
-    int maxFactorLog2 = (int)iplug::k8x;
 
     int factorLog2 = desiredFactorLog2;
     factorLog2 = (factorLog2 < 0) ? 0 : factorLog2;
-    factorLog2 = (factorLog2 > maxFactorLog2) ? maxFactorLog2 : factorLog2;
+    factorLog2 = (factorLog2 > kMaxOversamplingFactorLog2) ? kMaxOversamplingFactorLog2 : factorLog2;
 
     if (factorLog2 != impl.effectiveOvsFactorLog2_) {
 #if defined(USE_FAUST_DSP)
