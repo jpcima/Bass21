@@ -5,6 +5,7 @@
 #include <cstdint>
 
 TF2d makePresence(double sampleRate, double param);
+TF2d makeDrive(double sampleRate, double param);
 TF6d makeEQ(double sampleRate, double bass, double treble);
 
 //------------------------------------------------------------------------------
@@ -14,6 +15,7 @@ struct FilterCache : std::enable_shared_from_this<FilterCache> {
     enum { TableSize = 128 };
 
     TF2f presence[TableSize];
+    TF2f drive[TableSize];
     TF6f eq[TableSize][TableSize]; // [bass][treble]
 };
 

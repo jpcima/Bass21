@@ -22,6 +22,27 @@ TF2d makePresence(double sampleRate, double param)
     return bilinearTransform2(analog, sampleRate, 1.0);
 }
 
+TF2d makeDrive(double sampleRate, double param)
+{
+    TF2d analog;
+    double *B = analog.b();
+    double *A = analog.a();
+
+    double R1 = 330e3;
+    double C1 = 220e-12;
+    double R2 = 3.3e3;
+    double Rp = 100e3*(1.0-param);
+
+    B[0] = R1+R2+Rp;
+    B[1] = C1*R1*(R2+Rp);
+    B[2] = 0.0;
+    A[0] = R2+Rp;
+    A[1] = C1*R1*(R2+Rp);
+    A[2] = 0.0;
+
+    return bilinearTransform2(analog, sampleRate, 1.0);
+}
+
 TF6d makeEQ(double sampleRate, double bass, double treble)
 {
     TF6d analog;
@@ -126,6 +147,11 @@ static FilterCache::Ptr computeFilterCache(uint32_t sampleRate)
         fc->presence[i] = makePresence(sampleRate, param).to<float>();
     }
 
+    for (uint32_t i = 0; i < size; ++i) {
+        double param = i / (double)(size - 1);
+        fc->drive[i] = makeDrive(sampleRate, param).to<float>();
+    }
+
     for (uint32_t ib = 0; ib < size; ++ib) {
         double bass = ib / (double)(size - 1);
         for (uint32_t it = 0; it < size; ++it) {
@@ -167,6 +193,11 @@ std::ostream &operator<<(std::ostream &os, const FilterCache &fc)
     for (uint32_t i = 0; i < size; ++i) {
         double param = i / (double)(size - 1);
         os << "*** Presence [param=" << param << "]\n" << fc.presence[i] << "\n";
+    }
+
+    for (uint32_t i = 0; i < size; ++i) {
+        double param = i / (double)(size - 1);
+        os << "*** Drive [param=" << param << "]\n" << fc.drive[i] << "\n";
     }
 
     for (uint32_t ib = 0; ib < size; ++ib) {
