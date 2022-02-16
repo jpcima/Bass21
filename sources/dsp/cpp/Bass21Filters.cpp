@@ -131,3 +131,20 @@ FilterCache::Ptr getFilterCache(uint32_t sampleRate)
 
     return globalFilterCache.insert(std::make_pair(sampleRate, fc)).first->second;
 }
+
+//------------------------------------------------------------------------------
+std::ostream &operator<<(std::ostream &os, const FilterCache &fc)
+{
+    constexpr uint32_t size = 128;
+
+    for (uint32_t ib = 0; ib < size; ++ib) {
+        double bass = ib / (double)(size - 1);
+        for (uint32_t it = 0; it < size; ++it) {
+            double treble = it / (double)(size - 1);
+            os << "*** EQ [bass=" << bass << "; treble=" << treble << "]\n"
+               << fc.eq[ib][it] << "\n";
+        }
+    }
+
+    return os;
+}

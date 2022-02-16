@@ -1,6 +1,7 @@
 #pragma once
 #include "FilterTransfer.h"
 #include <memory>
+#include <iosfwd>
 #include <cstdint>
 
 TF6d makeEQ(double sampleRate, double bass, double treble);
@@ -15,3 +16,6 @@ struct FilterCache : std::enable_shared_from_this<FilterCache> {
 
 //------------------------------------------------------------------------------
 FilterCache::Ptr getFilterCache(uint32_t sampleRate);
+
+//------------------------------------------------------------------------------
+std::ostream &operator<<(std::ostream &os, const FilterCache &fc);

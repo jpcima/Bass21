@@ -180,3 +180,15 @@ if(BASS21_LV2)
     math(EXPR _filecounter "${_filecounter}+1")
   endforeach()
 endif()
+
+#------------------------------------------------------------------------------#
+# Test programs                                                                #
+#------------------------------------------------------------------------------#
+
+option(BASS21_TESTS "Build test programs" OFF)
+
+add_executable(Bass21FilterCache
+  "sources/tests/FilterCache.cpp")
+target_link_libraries(Bass21FilterCache
+  PRIVATE
+  Bass21DSP)

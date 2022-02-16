@@ -1,4 +1,5 @@
 #pragma once
+#include <iostream>
 #include <cstdint>
 
 template <class Real, uint32_t Ord>
@@ -34,6 +35,20 @@ struct TF
         return res;
     }
 };
+
+//------------------------------------------------------------------------------
+template <class Real, uint32_t Ord>
+std::ostream &operator<<(std::ostream &os, const TF<Real, Ord> &tf)
+{
+    os << "b=[";
+    for (uint32_t i = 0; i <= Ord; ++i)
+        os << (i ? " " : "") << tf.b()[i];
+    os << "];\n" "a=[";
+    for (uint32_t i = 0; i <= Ord; ++i)
+        os << (i ? " " : "") << tf.a()[i];
+    os << "];\n";
+    return os;
+}
 
 //------------------------------------------------------------------------------
 using TF2d = TF<double, 2>;
