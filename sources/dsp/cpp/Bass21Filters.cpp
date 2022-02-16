@@ -89,6 +89,33 @@ TF2d makeRCNetwork2(double sampleRate)
     return bilinearTransform2(analog, sampleRate, 1.0);
 }
 
+TF3d makeCamelFilter(double sampleRate)
+{
+    TF3d analog;
+    double *B = analog.b();
+    double *A = analog.a();
+
+    double R1 = 10e3;
+    double R2 = 22e3;
+    double R3 = 22e3;
+    double R4 = 22e3;
+    double R5 = 10e3;
+    double C1 = 47e-9;
+    double C2 = 470e-12;
+    double C3 = 10e-9;
+
+    B[0] = R4;
+    B[1] = C1*R4*R5;
+    B[2] = 0.0;
+    B[3] = 0.0;
+    A[0] = R4+R1;
+    A[1] = C1*R4*R5+C1*R2*R4+C1*R1*R5+C1*R1*R4+C1*R1*R2+C2*R3*R4+C2*R2*R4+C2*R1*R4+C2*R1*R3+C2*R1*R2;
+    A[2] = C2*C1*R3*R4*R5+C2*C1*R2*R4*R5+C2*C1*R2*R3*R4+C2*C1*R1*R4*R5+C2*C1*R1*R3*R5+C2*C1*R1*R3*R4+C2*C1*R1*R2*R5+C2*C1*R1*R2*R3+C3*C2*R2*R3*R4+C3*C2*R1*R3*R4+C3*C2*R1*R2*R3;
+    A[3] = C3*C2*C1*R2*R3*R4*R5+C3*C2*C1*R1*R3*R4*R5+C3*C2*C1*R1*R2*R3*R5;
+
+    return bilinearTransform3(analog, sampleRate, 1.0);
+}
+
 TF6d makeEQ(double sampleRate, double bass, double treble)
 {
     TF6d analog;
@@ -200,6 +227,7 @@ static FilterCache::Ptr computeFilterCache(uint32_t sampleRate)
 
     fc->rcNetwork1 = makeRCNetwork1(sampleRate).to<float>();
     fc->rcNetwork2 = makeRCNetwork2(sampleRate).to<float>();
+    fc->camelFilter = makeCamelFilter(sampleRate).to<float>();
 
     for (uint32_t ib = 0; ib < size; ++ib) {
         double bass = ib / (double)(size - 1);
@@ -251,6 +279,7 @@ std::ostream &operator<<(std::ostream &os, const FilterCache &fc)
 
     os << "*** RC Network 1\n" << fc.rcNetwork1 << "\n";
     os << "*** RC Network 2\n" << fc.rcNetwork2 << "\n";
+    os << "*** Camel filter\n" << fc.camelFilter << "\n";
 
     for (uint32_t ib = 0; ib < size; ++ib) {
         double bass = ib / (double)(size - 1);
