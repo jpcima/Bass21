@@ -34,9 +34,6 @@ Processor::Processor()
                      .withOutput("Output", juce::AudioChannelSet::mono())),
     impl_(new Impl(this))
 {
-    Impl &impl = *impl_;
-    Bass21 &dsp = impl.dsp_;
-    dsp.init();
 }
 
 Processor::~Processor()
@@ -58,7 +55,7 @@ void Processor::prepareToPlay(double sampleRate, int samplesPerBlock)
     Impl &impl = *impl_;
     Bass21 &dsp = impl.dsp_;
 
-    dsp.setSampleRate(sampleRate);
+    dsp.init(sampleRate);
 }
 
 void Processor::releaseResources()

@@ -6,7 +6,7 @@ public:
     Bass21();
     ~Bass21();
 
-    void init();
+    void init(double sampleRate);
     void clear();
     void setSampleRate(double sampleRate);
     void run(const float *input, float *output, int numFrames);

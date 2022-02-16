@@ -41,8 +41,7 @@ static LV2_Handle instantiate(const LV2_Descriptor *descriptor, double sampleRat
     self->sampleRate_ = sampleRate;
 
     Bass21 &dsp = self->dsp_;
-    dsp.init();
-    dsp.setSampleRate(sampleRate);
+    dsp.init(sampleRate);
 
     return self;
 }

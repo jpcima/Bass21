@@ -25,7 +25,7 @@ using DSP = Bass21CppDSP;
 #endif
 
 struct Bass21::Impl {
-    double sampleRate_ = 44100.0;
+    double sampleRate_ = 0.0;
     int effectiveOvsFactorLog2_ = -1;
     bool suspended_ = false;
     float bypassFade_ = 0.0;
@@ -48,17 +48,25 @@ Bass21::~Bass21()
 {
 }
 
-void Bass21::init()
+void Bass21::init(double sampleRate)
 {
     Impl &impl = *impl_;
     DSP &dsp = impl.dsp_;
-    dsp.init(impl.sampleRate_);
+
+    impl.sampleRate_ = sampleRate;
+    dsp.init(sampleRate);
+
+    impl.ovs_.Reset();
+    impl.effectiveOvsFactorLog2_ = -1;
+    impl.suspended_ = false;
+    impl.bypassFade_ = impl.bypass_;
 }
 
 void Bass21::clear()
 {
     Impl &impl = *impl_;
     DSP &dsp = impl.dsp_;
+
 #if defined(USE_FAUST_DSP)
     dsp.instanceConstants(impl.sampleRate_);
     dsp.instanceClear();
