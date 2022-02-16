@@ -5,6 +5,8 @@ class Bass21CppDSP::Impl {
 public:
     float m_sampleRate = 0;
 
+    FilterCache::Ptr m_filters;
+
     LinearSmoother m_Pregain;
     LinearSmoother m_Level;
     LinearSmoother m_Blend;
@@ -27,6 +29,17 @@ void Bass21CppDSP::init(double sampleRate)
 {
     
 
+    clear();
+}
+
+void Bass21CppDSP::setFilters(FilterCache::Ptr filters)
+{
+    Impl &impl = *m_impl;
+
+    if (filters == impl.m_filters)
+        return;
+
+    impl.m_filters = filters;
     clear();
 }
 

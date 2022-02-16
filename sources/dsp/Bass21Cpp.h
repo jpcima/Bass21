@@ -1,4 +1,5 @@
 #pragma once
+#include "cpp/Bass21Filters.h"
 #include <memory>
 
 class Bass21CppDSP {
@@ -7,6 +8,7 @@ public:
     ~Bass21CppDSP();
 
     void init(double sampleRate);
+    void setFilters(FilterCache::Ptr filters);
     void clear();
     void compute(int count, float const *const *inputs, float *const *outputs);
 

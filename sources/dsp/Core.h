@@ -8,7 +8,6 @@ public:
 
     void init(double sampleRate);
     void clear();
-    void setSampleRate(double sampleRate);
     void run(const float *input, float *output, int numFrames);
 
     void setBypass(bool value);

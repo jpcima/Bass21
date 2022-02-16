@@ -4,6 +4,7 @@
 #include "dsp/Bass21Faust.hxx"
 #else
 #include "dsp/Bass21Cpp.h"
+#include "dsp/cpp/Bass21Filters.h"
 #endif
 #include <DenormalDisabler.h>
 #include <cstdio>
@@ -36,6 +37,10 @@ struct Bass21::Impl {
     DSP dsp_;
     iplug::OverSampler<float> ovs_;
     //
+#if !defined(USE_FAUST_DSP)
+    FilterCache::Ptr filterCache_[kMaxOversamplingFactorLog2 + 1];
+#endif
+    //
     float copyBuffer_[kMaxFramesPerSegment];
 };
 
@@ -56,10 +61,21 @@ void Bass21::init(double sampleRate)
     impl.sampleRate_ = sampleRate;
     dsp.init(sampleRate);
 
+#if !defined(USE_FAUST_DSP)
+    for (int factorLog2 = 0; factorLog2 <= kMaxOversamplingFactorLog2; ++factorLog2) {
+        double ovsRate = sampleRate * (1 << factorLog2);
+        impl.filterCache_[factorLog2] = getFilterCache((uint32_t)(ovsRate + 0.5));
+    }
+#endif
+
     impl.ovs_.Reset();
     impl.effectiveOvsFactorLog2_ = -1;
     impl.suspended_ = false;
     impl.bypassFade_ = impl.bypass_;
+
+#if !defined(USE_FAUST_DSP)
+    dsp.setFilters(nullptr);
+#endif
 }
 
 void Bass21::clear()
@@ -79,13 +95,10 @@ void Bass21::clear()
     impl.effectiveOvsFactorLog2_ = -1;
     impl.suspended_ = false;
     impl.bypassFade_ = impl.bypass_;
-}
 
-void Bass21::setSampleRate(double sampleRate)
-{
-    Impl &impl = *impl_;
-    impl.sampleRate_ = sampleRate;
-    clear();
+#if !defined(USE_FAUST_DSP)
+    dsp.setFilters(nullptr);
+#endif
 }
 
 void Bass21::run(const float *input, float *output, int numFrames)
@@ -117,6 +130,10 @@ void Bass21::run(const float *input, float *output, int numFrames)
         ovs.SetOverSampling((iplug::EFactor)factorLog2);
         impl.effectiveOvsFactorLog2_ = factorLog2;
     }
+
+#if !defined(USE_FAUST_DSP)
+    dsp.setFilters(impl.filterCache_[factorLog2]);
+#endif
 
     ///
     const bool bypass = impl.bypass_;
