@@ -187,8 +187,10 @@ endif()
 
 option(BASS21_TESTS "Build test programs" OFF)
 
-add_executable(Bass21FilterCache
-  "sources/tests/FilterCache.cpp")
-target_link_libraries(Bass21FilterCache
-  PRIVATE
-  Bass21DSP)
+if(NOT BASS21_USE_FAUST_DSP)
+  add_executable(Bass21FilterCache
+    "sources/tests/FilterCache.cpp")
+  target_link_libraries(Bass21FilterCache
+    PRIVATE
+    Bass21DSP)
+endif()
