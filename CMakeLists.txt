@@ -18,27 +18,42 @@ find_package(PkgConfig)
 # DSP core                                                                     #
 #------------------------------------------------------------------------------#
 
+# TODO: change to OFF when implemented
+option(BASS21_USE_FAUST_DSP "Prefer using Faust DSP instead of C++" ON)
+
 add_library(Bass21DSP STATIC EXCLUDE_FROM_ALL
   "sources/dsp/Core.h"
-  "sources/dsp/Core.cpp")
+  "sources/dsp/Core.cpp"
+  "sources/dsp/Bass21Definitions.h")
 
 target_include_directories(Bass21DSP
   PUBLIC
   "sources")
 
-add_faust_command(
-  "sources/dsp/Bass21Faust.dsp"
-  "sources/dsp/Bass21Faust.hxx"
-  IN_PLACE
-  DOUBLE
-  MATH_APPROXIMATION
-  CLASS_NAME "Bass21FaustDSP"
-  IMPORT_DIRS "sources/dsp")
+if(BASS21_USE_FAUST_DSP)
+  add_faust_command(
+    "sources/dsp/Bass21Faust.dsp"
+    "sources/dsp/Bass21Faust.hxx"
+    IN_PLACE
+    DOUBLE
+    MATH_APPROXIMATION
+    CLASS_NAME "Bass21FaustDSP"
+    IMPORT_DIRS "sources/dsp")
 
-target_sources(Bass21DSP PRIVATE
-  "sources/dsp/Bass21Faust.hxx")
+  target_sources(Bass21DSP PRIVATE
+    "sources/dsp/Bass21Faust.hxx")
 
-target_include_directories(Bass21DSP PRIVATE
+  target_compile_definitions(Bass21DSP
+    PRIVATE
+    "USE_FAUST_DSP")
+else()
+  target_sources(Bass21DSP PRIVATE
+    "sources/dsp/Bass21Cpp.cpp"
+    "sources/dsp/Bass21Cpp.h")
+endif()
+
+target_include_directories(Bass21DSP
+  PRIVATE
   "thirdparty/iPlug2"
   "thirdparty/hiir-1.33"
   "thirdparty/blink"
