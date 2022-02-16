@@ -9,6 +9,7 @@ TF2d makeDrive(double sampleRate, double param);
 TF3d makeRCNetwork1(double sampleRate);
 TF2d makeRCNetwork2(double sampleRate);
 TF3d makeCamelFilter(double sampleRate);
+TF2d makeSimpleActive1(double sampleRate);
 TF6d makeEQ(double sampleRate, double bass, double treble);
 
 //------------------------------------------------------------------------------
@@ -22,6 +23,7 @@ struct FilterCache : std::enable_shared_from_this<FilterCache> {
     TF3f rcNetwork1;
     TF2f rcNetwork2;
     TF3f camelFilter;
+    TF2f simpleActive1;
     TF6f eq[TableSize][TableSize]; // [bass][treble]
 };
 
