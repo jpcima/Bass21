@@ -50,6 +50,8 @@ else()
   target_sources(Bass21DSP PRIVATE
     "sources/dsp/Bass21Cpp.cpp"
     "sources/dsp/Bass21Cpp.h"
+    "sources/dsp/cpp/Bass21Filters.cpp"
+    "sources/dsp/cpp/Bass21Filters.h"
     "sources/dsp/cpp/FilterTransfer.cpp"
     "sources/dsp/cpp/FilterTransfer.h")
 endif()
