@@ -38,6 +38,9 @@ public:
         return {{&m_Pregain, &m_Level, &m_Blend, &m_Presence,
                  &m_Drive, &m_Bass, &m_Treble}};
     }
+
+    float m_tmpSignal1[kMaxFramesPerSegment << kMaxOversamplingFactorLog2];
+    float m_tmpSignal2[kMaxFramesPerSegment << kMaxOversamplingFactorLog2];
 };
 
 Bass21CppDSP::Bass21CppDSP()
@@ -128,7 +131,7 @@ void Bass21CppDSP::compute(int count_, float const *const *inputs, float *const 
     // dry blend path
 
     // pregain
-    float dryBlend[kMaxFramesPerSegment];
+    float *dryBlend = impl.m_tmpSignal1;
     applySmoothGain(impl.m_Pregain, input, dryBlend, count);
 
     // negligible input filter
@@ -136,7 +139,7 @@ void Bass21CppDSP::compute(int count_, float const *const *inputs, float *const 
 
     //--------------------------------------------------------------------------
     // wet blend path
-    float wetBlend[kMaxFramesPerSegment];
+    float *wetBlend = impl.m_tmpSignal2;
 
     assert(impl.m_filters);
     FilterCache &filters = *impl.m_filters;
@@ -188,7 +191,11 @@ void Bass21CppDSP::compute(int count_, float const *const *inputs, float *const 
     //TODO: smooth EQ
     {
         TF6f eqTf = filters.getEQ(impl.m_Bass.getTarget(), impl.m_Treble.getTarget());
-        //std::cerr << eqTf;
+        if (0) {
+            std::cerr << "[bass=" << impl.m_Bass.getTarget()
+                      << " ; treble=" << impl.m_Treble.getTarget()
+                      << "]\n" << eqTf;
+        }
         impl.m_eq.setTransfer(eqTf);
         impl.m_eq.processInPlace(output, count);
         for (uint32_t i = 0; i < count; ++i)
