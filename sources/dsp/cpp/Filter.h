@@ -45,3 +45,6 @@ private:
     std::array<Real, Ord> m_mem{};
     TF<Real, Ord> m_tf;
 };
+
+template <uint32_t Ord> using IIR_TF2f = IIR_TF2<float, Ord>;
+template <uint32_t Ord> using IIR_TF2d = IIR_TF2<double, Ord>;

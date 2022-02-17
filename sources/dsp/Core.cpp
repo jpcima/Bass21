@@ -72,10 +72,6 @@ void Bass21::init(double sampleRate)
     impl.effectiveOvsFactorLog2_ = -1;
     impl.suspended_ = false;
     impl.bypassFade_ = impl.bypass_;
-
-#if !defined(USE_FAUST_DSP)
-    dsp.setFilters(nullptr);
-#endif
 }
 
 void Bass21::clear()
@@ -95,10 +91,6 @@ void Bass21::clear()
     impl.effectiveOvsFactorLog2_ = -1;
     impl.suspended_ = false;
     impl.bypassFade_ = impl.bypass_;
-
-#if !defined(USE_FAUST_DSP)
-    dsp.setFilters(nullptr);
-#endif
 }
 
 void Bass21::run(const float *input, float *output, int numFrames)
@@ -119,6 +111,10 @@ void Bass21::run(const float *input, float *output, int numFrames)
     factorLog2 = (factorLog2 < 0) ? 0 : factorLog2;
     factorLog2 = (factorLog2 > kMaxOversamplingFactorLog2) ? kMaxOversamplingFactorLog2 : factorLog2;
 
+#if !defined(USE_FAUST_DSP)
+    dsp.setFilters(impl.filterCache_[factorLog2]);
+#endif
+
     if (factorLog2 != impl.effectiveOvsFactorLog2_) {
 #if defined(USE_FAUST_DSP)
         dsp.instanceConstants(sampleRate * (1 << factorLog2));
@@ -130,10 +126,6 @@ void Bass21::run(const float *input, float *output, int numFrames)
         ovs.SetOverSampling((iplug::EFactor)factorLog2);
         impl.effectiveOvsFactorLog2_ = factorLog2;
     }
-
-#if !defined(USE_FAUST_DSP)
-    dsp.setFilters(impl.filterCache_[factorLog2]);
-#endif
 
     ///
     const bool bypass = impl.bypass_;
