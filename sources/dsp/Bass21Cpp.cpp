@@ -53,6 +53,8 @@ void Bass21CppDSP::init(double sampleRate)
 {
     Impl &impl = *m_impl;
 
+    impl.m_sampleRate = sampleRate;
+
     for (LinearSmoother *s : impl.getSmoothers()) {
         s->setSampleRate(sampleRate);
         s->setTimeConstant(10e-3);
