@@ -127,6 +127,17 @@ void Bass21CppDSP::compute(int count_, float const *const *inputs, float *const 
     const uint32_t count = (uint32_t)count_;
     const float *input = inputs[0];
 
+    if (0) {
+        std::cerr << "---\n"
+            "pregain:  " << impl.m_Pregain.getTarget() << "\n"
+            "level:    " << impl.m_Level.getTarget() << "\n"
+            "blend:    " << impl.m_Blend.getTarget() << "\n"
+            "presence: " << impl.m_Presence.getTarget() << "\n"
+            "drive:    " << impl.m_Drive.getTarget() << "\n"
+            "bass:     " << impl.m_Bass.getTarget() << "\n"
+            "treble:   " << impl.m_Treble.getTarget() << "\n";
+    }
+
     //--------------------------------------------------------------------------
     // dry blend path
 
