@@ -22,7 +22,6 @@ public:
     IIR_TF2f<3> m_camelFilter;
     IIR_TF2f<2> m_rcNetwork2;
     IIR_TF2f<2> m_simpleActive1;
-    //IIR_TF2f<6> m_eq;
     IIR_TF2f<6> m_eq;
 
     LinearSmoother m_Pregain;
