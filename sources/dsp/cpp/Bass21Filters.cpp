@@ -273,6 +273,14 @@ static TF<Real, Ord> getTFInterpolated1D(const TF<Real, Ord> (&table)[Count], Re
 }
 
 template <class Real, uint32_t Ord, uint32_t Count>
+static const TF<Real, Ord> &getTFNearest1D(const TF<Real, Ord> (&table)[Count], Real param)
+{
+    Real index = param * (Count - 1);
+    uint32_t near = (uint32_t)(index + Real(0.5));
+    return table[near];
+}
+
+template <class Real, uint32_t Ord, uint32_t Count>
 static TF<Real, Ord> getTFInterpolated2D(const TF<Real, Ord> (&table)[Count][Count], Real param1, Real param2)
 {
     Real dim1_index = param1 * (Count - 1);
@@ -289,6 +297,18 @@ static TF<Real, Ord> getTFInterpolated2D(const TF<Real, Ord> (&table)[Count][Cou
         interpolateTF(table[dim1_i1][dim2_i1], table[dim1_i1][dim2_i2], dim2_frac),
         interpolateTF(table[dim1_i2][dim2_i1], table[dim1_i2][dim2_i2], dim2_frac),
         dim1_frac);
+}
+
+template <class Real, uint32_t Ord, uint32_t Count>
+static const TF<Real, Ord> &getTFNearest2D(const TF<Real, Ord> (&table)[Count][Count], Real param1, Real param2)
+{
+    Real dim1_index = param1 * (Count - 1);
+    uint32_t dim1_near = (uint32_t)(dim1_index + Real(0.5));
+
+    Real dim2_index = param2 * (Count - 1);
+    uint32_t dim2_near = (uint32_t)(dim2_index + Real(0.5));
+
+    return table[dim1_near][dim2_near];
 }
 
 TF2f FilterCache::getPresence(float param) const
