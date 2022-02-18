@@ -192,12 +192,8 @@ void Bass21CppDSP::compute(int count_, float const *const *inputs, float *const 
     applySmoothGain(impl.m_Level, output, output, count);
 
     // negligible active filter 2, replaced by volume boost and inversion
-    for (uint32_t i = 0; i < count; ++i) {
-        for (uint32_t i = 0; i < count; ++i)
-            output[i] *= -2.2; // -R2/R1 ; R1=10k, R2=22k
-    }
     for (uint32_t i = 0; i < count; ++i)
-        output[i] = tableTanh(output[i]);
+        output[i] = tableTanh(-2.2f * output[i]); // -R2/R1 ; R1=10k, R2=22k
 
     //TODO: smooth EQ
     {
