@@ -13,6 +13,11 @@ public:
         m_tf = tf.normalized();
     }
 
+    const TF<Real, Ord> &getTransfer() const
+    {
+        return m_tf;
+    }
+
     void clear()
     {
         m_memX.fill(Real(0));
@@ -67,6 +72,11 @@ public:
     void setTransfer(const TF<Real, Ord> &tf)
     {
         m_tf = tf.normalized();
+    }
+
+    const TF<Real, Ord> &getTransfer() const
+    {
+        return m_tf;
     }
 
     void clear()

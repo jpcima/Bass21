@@ -197,7 +197,7 @@ void Bass21CppDSP::compute(int count_, float const *const *inputs, float *const 
     //TODO: smooth EQ
     {
         TF6f eqTf = filters.getEQ(impl.m_Bass.getTarget(), impl.m_Treble.getTarget());
-        if (0) {
+        if (0 && eqTf != impl.m_eq.getTransfer()) {
             std::cerr << "[bass=" << impl.m_Bass.getTarget()
                       << " ; treble=" << impl.m_Treble.getTarget()
                       << "]\n" << eqTf;
