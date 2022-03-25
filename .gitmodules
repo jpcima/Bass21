@@ -1,0 +1,3 @@
+[submodule "thirdparty/scope-lite"]
+	path = thirdparty/scope-lite
+	url = https://github.com/martinmoene/scope-lite.git
