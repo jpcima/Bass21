@@ -16,6 +16,13 @@ process = bass21(pregain, level, blend, presence, drive, bass, treble) with {
   pole = ba.tau2pole(50e-3/6.91);
 };
 
+processEQ = bass21EQ(bass, treble) with {
+  begin = checkbox("[0] begin");
+  bass = hslider("[6] bass", 0.5, 0.0, 1.0, 0.001) : si.polySmooth(begin, pole, 0);
+  treble = hslider("[7] treble", 0.5, 0.0, 1.0, 0.001) : si.polySmooth(begin, pole, 0);
+  pole = ba.tau2pole(50e-3/6.91);
+};
+
 //------------------------------------------------------------------------------
 // Circuit
 //------------------------------------------------------------------------------

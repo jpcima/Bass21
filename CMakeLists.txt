@@ -40,8 +40,19 @@ if(BASS21_USE_FAUST_DSP)
     CLASS_NAME "Bass21FaustDSP"
     IMPORT_DIRS "sources/dsp")
 
+  add_faust_command(
+    "sources/dsp/Bass21Faust.dsp"
+    "sources/dsp/Bass21EQFaust.hxx"
+    PROCESS_NAME "processEQ"
+    IN_PLACE
+    DOUBLE
+    MATH_APPROXIMATION
+    CLASS_NAME "Bass21EQFaustDSP"
+    IMPORT_DIRS "sources/dsp")
+
   target_sources(Bass21DSP PRIVATE
-    "sources/dsp/Bass21Faust.hxx")
+    "sources/dsp/Bass21Faust.hxx"
+    "sources/dsp/Bass21EQFaust.hxx")
 
   target_compile_definitions(Bass21DSP
     PRIVATE
@@ -192,10 +203,29 @@ endif()
 
 option(BASS21_TESTS "Build test programs" OFF)
 
-if(NOT BASS21_USE_FAUST_DSP)
-  add_executable(Bass21FilterCache
-    "sources/tests/FilterCache.cpp")
-  target_link_libraries(Bass21FilterCache
+if(BASS21_TESTS)
+  add_subdirectory("thirdparty/scope-lite" EXCLUDE_FROM_ALL)
+
+  add_executable(Bass21EQ
+    "sources/tests/EQ.cpp")
+  target_include_directories(Bass21EQ
     PRIVATE
-    Bass21DSP)
+    "thirdparty/dr_libs")
+  target_link_libraries(Bass21EQ
+    PRIVATE
+    Bass21DSP
+    nonstd::scope-lite)
+  if(BASS21_USE_FAUST_DSP)
+    target_compile_definitions(Bass21EQ
+      PRIVATE
+      "USE_FAUST_DSP")
+  endif()
+
+  if(NOT BASS21_USE_FAUST_DSP)
+    add_executable(Bass21FilterCache
+      "sources/tests/FilterCache.cpp")
+    target_link_libraries(Bass21FilterCache
+      PRIVATE
+      Bass21DSP)
+  endif()
 endif()
